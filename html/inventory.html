@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
+  <script src="../js/jquery-2.1.4.min.js"></script>
+  <script src="../js/bootstrap.min.js"></script>
+  <script src="../js/script.js"></script>
+  <script src="../lib/angular/angular.min.js"></script>
+  <script src="js/controllers.js"></script>
+  <title>Inventory</title>
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+<ul class="nav nav-tabs nav-stacked col-md-2">
+  <li class="active"><a href="#item" data-toggle="tab">Item</a></li>
+  <li><a href="#warehouse" data-toggle="tab">Warehouse</a></li>
+</ul>
+<div class="tab-content col-md-10">
+        <div class="tab-pane active" id="item">
+          <div id="tabItem"></div>
+        </div>
+        <div class="tab-pane" id="warehouse">
+          <div id="tabWarehouse"></div>
+        </div>
+
+</div>
+</div>
+
+<div id="footer"></div>
+
+</body>
+</html>

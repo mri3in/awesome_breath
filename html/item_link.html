@@ -1,0 +1,94 @@
+<?php
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html>
+    <body>
+        
+<div class="container">
+    <h1>Product Item</h1>
+    <div class="col-lg-12">
+    <a class="btn btn-default" href="newitem.html">Create New Item</a>
+    <a class="btn btn-default" href="newcat.html">Create New Category</a>
+    <button class="btn btn-danger">Delete Item</button>
+    <button class="btn btn-primary">Generate report</button>
+    </div>
+   <div class="col-lg-12">
+       <h5>Search</h5>
+        <input type="text" class="form-control" style="width:auto" placeholder="Search for">
+        <select class="form-control" style="width:auto; margin:2px 0px">
+            <option>P/N</option>
+            <option>Item</option>
+            <option>Category</option>
+        </select>
+    </div>
+    <div class="container">
+        <?php
+
+        $sql = "SELECT item_id, item_category_id, item_name, item_unit_of_measurement, item_expiry_period, item_description FROM item";
+        $result = mysqli_query($db, $sql);
+
+        if (mysqli_num_rows($result) > 0) {
+        echo "
+        <table>
+            <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Name</th>
+                <th>Unit of measurement</th>
+                <th>Expiry period</th>
+                <th>Description</th>
+            </tr>";
+        // output data of each row
+        while($row = mysqli_fetch_assoc($result)) {
+        echo "
+            <a>
+                <td><input type=" . "checkbox></td>
+                <td>
+                    <a href=" . "../edit.html?" . $row["item_id"] .">
+                    " . $row["item_id"]. "
+                    </a>
+                </td>
+
+                <td>
+                    <a href=" . "../edit.html?" . $row["item_id"] .">
+                    " . $row["item_category_id"]. "
+                    </a>
+                </td>
+                <td>
+                    <a href=" . "../edit.html?" . $row["item_id"] .">
+                    " . $row["item_name"]. "
+                    </a>
+                </td>
+                <td>
+                    <a href=" . "../edit.html?" . $row["item_id"] .">
+                    " . $row["item_unit_of_measurement"]. "
+                    </a>
+                </td>
+                <td>
+                    <a href=" . "../edit.html?" . $row["item_id"] .">
+                    " . $row["item_expiry_period"]. "
+                    </a>
+                </td>
+
+                <td>
+                    <a href=" . "../edit.html?" . $row["item_id"] .">
+                    " . $row["item_description"]. "
+                    </a>
+                </td>
+
+            </tr>";
+        }
+        echo "</table>";
+        } else {
+        echo "0 results";
+        }
+
+        mysqli_close($db); // Closing Connection
+        ?>
+    </div>
+</div>
+    </body>
+</html>

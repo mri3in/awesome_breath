@@ -1,0 +1,354 @@
+<?php
+//include the definition of database
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
+  <script src="../js/jquery-2.1.4.min.js"></script>
+  <script src="../js/bootstrap.min.js"></script>
+  <script src="../js/script.js"></script>
+  <script src="../lib/angular/angular.min.js"></script>
+  <script src="../js/controllers.js"></script>
+
+</head>
+<body>
+
+    <div id="header"></div>
+
+    <div class="container">
+        <?php //get the desired customer by customer_id in URL
+            if (isset($_GET['customer_id'])) {
+
+                //get the param in URL of customer_id
+                $edit_customer_id = $_GET['customer_id'];
+
+                //check if the id is taken correctly
+                //echo $edit_customer_id;
+
+                //set up the sql to select the record that has the corresponding customer_id
+                $sql = "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_id = '$edit_customer_id'";
+
+                //run the query to get the customer
+                $query = mysqli_query($db,$sql) or die ("Error: Cannot edit customer");
+
+                //fetch the result to an array
+                $row = mysqli_fetch_assoc($query);
+                
+                //store the data to variables
+                $customer_name = $row['customer_name'];
+                $customer_long_name = $row['customer_long_name'];
+                $customer_shipping_address = $row['customer_shipping_address'];
+                $customer_billing_address = $row['customer_billing_address'];
+                $customer_contact_person_name = $row['customer_contact_person_name'];
+                $customer_contact_person_phone_number = $row['customer_contact_person_phone_number'];
+                $customer_tax_code = $row['customer_tax_code'];
+                $staff_id = $row['staff_id'];
+                $staff_name = $row['staff_name'];
+                //$staff_supervisor_id = $row['staff_supervisor_id'];
+                $customer_credit_limit = $row['customer_credit_limit'];
+                $customer_payment_term = $row['customer_payment_term'];
+                $customer_contact_person_email = $row['customer_contact_person_email'];
+                $customer_status = $row['customer_status'];
+            }
+            else
+            {
+                //if not GET method found, declare all the variables as empty to prevent error
+                $customer_id = "";
+                $customer_name = "";
+                $customer_long_name = "";
+                $customer_shipping_address = ""; 
+                $customer_billing_address = ""; 
+                $customer_contact_person_name = ""; 
+                $customer_contact_person_phone_number = ""; 
+                $customer_tax_code = ""; 
+                $staff_id = "";
+                $staff_name = "";
+                //$staff_supervisor_id = "";
+                $customer_credit_limit = ""; 
+                $customer_payment_term = "";
+                $customer_contact_person_email = ""; 
+                $customer_status = "";
+            }
+        ?>
+
+        <div class="row">
+            <!--establish the form for customer, the form will perform validation, after that, search function -->
+            <form role="form" name="myForm" action="../php/edit_customer.php" onsubmit="return validateForm()" method="post">
+
+                <!--define the title of the form + the note for * symbol-->
+                <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
+                    <h2 class="text-center">Customer</h2>
+                    <div class="well well-sm"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+
+                    <!--draw a outside border + display form legend-->
+                    <fieldset>
+                        <legend>Basic Information</legend>
+
+                        <!--hide the customer_id so user cannot edit it but the value will be passed on submitting the form-->
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="hidden" class="form-control" name="customer_id" value="<?php echo $edit_customer_id; ?>" required>
+                            </div>
+                        </div>
+
+                        <!--display the required fields-->
+                        <!--display customer name-->
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="customer_name" placeholder="Customer Name" value= "<?php echo $customer_name; ?>"  required>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Customer Long Name</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="customer_long_name" placeholder="Customer Long Name" value= "<?php echo $customer_long_name; ?>"  required>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <!--display customer billing address-->
+                        <div class="form-group">
+                            <label>Customer Billing Address</label>
+
+                            <?php //split the string billing address based on semi-colon
+                                //$customer_billing_address = $row['customer_billing_address'];
+
+                                //declare 3 variables as blank to prevent no data from the string
+                                $customer_billing_address_street = "";
+                                $customer_billing_address_city = "";
+                                $customer_billing_address_country = "";
+
+                                //split the string and assign to the variables
+                                if ($customer_billing_address != ""){
+                                    list($customer_billing_address_street, $customer_billing_address_city, $customer_billing_address_country) = explode(";", $customer_billing_address);
+                                    }
+                            ?>
+
+                            <!--display customer billing address street + city + country-->
+                            <div class="row">
+
+                                <!--display customer billing address street-->
+                                <div class="form-group col-md-12">
+                                    <label>Street</label>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_street" placeholder="Street" value="<?php echo $customer_billing_address_street; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--display customer billing address city-->
+                                <div class="form-group col-md-7">
+                                    <label>City</label>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:90%" class="form-control" name="customer_billing_address_city" placeholder="City" value="<?php echo $customer_billing_address_city; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--display customer billing address country-->
+                                <div class="form-group col-md-5">
+                                    <label>Country</label>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_country" placeholder="Country" value="<?php echo $customer_billing_address_country; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--display customer tax code-->
+                        <div class="form-group">
+                            <label>Customer Tax Code</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="customer_tax_code" placeholder="Customer Tax Code" value="<?php echo $customer_tax_code; ?>" required>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <!--display customer accountable salesperson + responsible supervisor-->
+                        <div class="form-group">
+                            <label>Salesperson Accountable</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="staff_name" placeholder="Salesperson Accountable" value="<?php echo $staff_name; ?>" disabled>
+                                <!--<input type="hidden" class="form-control" name="staff_supervisor_id" placeholder="Staff Supervisor ID" value="<?php echo $staff_supervisor_id; ?>">-->
+                                <input type="hidden" class="form-control" name="staff_id" placeholder="Staff ID" value="<?php echo $staff_id; ?>">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <!--display customer description-->
+                        <div class="form-group">
+                            <label>Customer Status</label>
+                            <div>
+                                <!--run script to set the default option of select box to be the corresponding status of customer-->
+                                <script>
+                                    $(document).ready(function() {
+                                        $("#customer_status_select").val("<?php echo $customer_status;?>");
+                                        //alert("<?php echo $customer_status;?>")
+                                    });
+                                </script>
+
+                                <!--set up the status of customer -->
+                                <select id="customer_status_select" name="customer_status" class="form-control">
+                                    <option name="customer_status_none" value="None"> Please select a status</option>
+                                    <option name="customer_status_active" value="Active">Active</option>
+                                    <option name="customer_status_suspended" value="Suspended">Suspended</option>
+                                    <option name="customer_status_deleted" value="Deleted">Deleted</option>
+                                </select>
+                                <span class="input-group-addon"><span class="glyphicon"></span></span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!--display other details as tab + sub-tabs-->
+                    <!--tab headers-->
+                    <div>
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#contact" data-toggle="tab">Customer Contact Person</a></li>
+                            <li><a href="#shipping" data-toggle="tab">Shipping Address</a></li>
+                            <li><a href="#payment" data-toggle="tab">Payment</a></li>
+                        </ul>
+
+                        <!--sub-tab Contact person-->
+                        <div class="tab-content ">
+                            <div class="tab-pane active" id="contact">
+                                <!--<legend>Contact Person</legend>-->
+
+                                <!--contact person name-->
+                                <div class="form-group" style="margin-top: 15px !important;">
+                                    <label>Contact Person Name</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="customer_contact_person_name" placeholder="Contact person Name" value="<?php echo $customer_contact_person_name; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--contact person phone number-->
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="customer_contact_person_phone_number" placeholder="Phone Number" value="<?php echo $customer_contact_person_phone_number; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--contact person email address-->
+                                <div class="form-group">
+                                    <label>Email Address</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="customer_contact_person_email" placeholder="Email Address" value="<?php echo $customer_contact_person_email; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--tab Customer shipping address-->
+                            <div class="tab-pane" id="shipping">
+                                <div class="form-group" style="margin-top: 15px !important;">
+
+                                <?php //split the string shipping address based on semi-colon
+                                //$customer_shipping_address = $row['customer_shipping_address'];
+
+                                //declare 3 variables as blank to prevent no data from the string
+                                $customer_shipping_address_street = "";
+                                $customer_shipping_address_city = "";
+                                $customer_shipping_address_country = "";
+
+                                //split the string and assign to the variables
+                                if ($customer_shipping_address != ""){
+                                    list($customer_shipping_address_street, $customer_shipping_address_city, $customer_shipping_address_country) = explode(";", $customer_shipping_address);
+                                    }
+                            ?>
+
+                            <!--display customer shipping address street + city + country-->
+                            <div class="row">
+
+                                <!--display customer shipping address street-->
+                                <div class="form-group col-md-12">
+                                    <label>Street</label>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_street" placeholder="Street" value="<?php echo $customer_shipping_address_street; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--display customer shipping address city-->
+                                <div class="form-group col-md-7">
+                                    <label>City</label>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:90%" class="form-control" name="customer_shipping_address_city" placeholder="City" value="<?php echo $customer_shipping_address_city; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--display customer shipping address country-->
+                                <div class="form-group col-md-5">
+                                    <label>Country</label>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_country" placeholder="Country" value="<?php echo $customer_shipping_address_country; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                                    <div class="clear"></div>
+
+                                </div>
+                            </div>
+
+                            <!--sub-tab payment term + details-->
+                            <div class="tab-pane" id="payment">
+                                <!--<legend>Payment</legend>-->
+
+                                <!--credit limit-->
+                                <div class="form-group" style="margin-top: 15px !important;">
+                                    <label>Customer Credit Limit</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="customer_credit_limit" placeholder="Customer Credit Limit" value="<?php echo $customer_credit_limit; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+
+                                <!--customer payment-->
+                                <!--<div class="form-group">-->
+                                    <!--<label>Customer Payment</label>-->
+                                    <!--<div class="input-group">-->
+                                        <!--<input type="text" class="form-control" name="customer_payment" placeholder="Customer Payment" value="<?php echo $customer_payment; ?>" required>-->
+                                        <!--<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+
+                                <!--customer payment term -->
+                                <div class="form-group">
+                                    <label>Customer Payment Term</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="customer_payment_term" placeholder="Customer Payment Term" value="<?php echo $customer_payment_term; ?>" required>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--submit button-->
+                    <input type="submit" name="submit" id="submit" value="Update" class="btn btn-default pull-right">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+</body>
+</html>

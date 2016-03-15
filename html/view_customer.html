@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
+  <script src="js/jquery-2.1.4.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/script.js"></script>
+  <script src="lib/angular/angular.min.js"></script>
+  <script src="js/controllers.js"></script>
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+    <div class="row">
+        <form role="form">
+            <div class="col-lg-6 col-lg-push-3 col-md-6 col-md-push-3">
+                    <h2 class="text-center">Customer</h2>
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="customer_name" placeholder="Customer Name" readonly>
+                        <span class="input-group-addon"><span class="glyphicon "></span></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Customer Shipping Address</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="customer_shipping_address" placeholder="Customer Shipping Addressl" readonly>
+                        <span class="input-group-addon"><span class="glyphicon "></span></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Customer Billing Address</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="customer_billing_address" placeholder="Customer Billing Address" readonly>
+                        <span class="input-group-addon"><span class="glyphicon "></span></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Customer Contact Person Name</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="customer_contact_person_name" placeholder="Customer Contactperson Name" readonly>
+                        <span class="input-group-addon"><span class="glyphicon "></span></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Customer Contact Person Phone Number</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="customer_contact_person_phone_number" placeholder="Customer Contact Person Phone Number" readonly>
+                        <span class="input-group-addon"><span class="glyphicon "></span></span>
+                    </div>
+                </div>
+                  <div class="form-group">
+                      <label>Customer Tax Code</label>
+                      <div class="input-group">
+                          <input type="number" class="form-control" name="customer_tax_code" placeholder="Customer Tax Code" readonly>
+                          <span class="input-group-addon"><span class="glyphicon "></span></span>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label>Saleperson Accountable</label>
+                      <div class="input-group">
+                          <input type="number" class="form-control" name="staff_name" placeholder="Staff Name" readonly>
+                          <span class="input-group-addon"><span class="glyphicon "></span></span>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label>Note</label>
+                      <div class="input-group">
+                          <textarea name="customer_note" class="form-control" rows="5" readonly></textarea>
+                          <span class="input-group-addon"><span class="glyphicon"></span></span>
+                      </div>
+                  </div>
+                <a class="btn btn-success pull-right" href="edit_customer.html">Edit </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="footer"></div>
+
+</body>
+</html>

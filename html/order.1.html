@@ -1,0 +1,198 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--include the search JS-->
+        <script src="../js/showSearchOrder.js"></script>
+
+        <!--disable enter key on the form in this page-->
+        <script>
+            $(document).ready(function() {
+                //in each element form, bind this function
+                $("form").bind("keypress", function(e) {
+                    //if the press key is ENTER, disable the event
+                    if (e.keyCode == 13) {
+                        return false;
+                    }
+                });
+            });
+        </script>
+    </head>
+    
+    <body>
+        
+        <div class="container">
+          <!--Page Title-->
+          <h1>Order</h1><br/>
+            
+           order 1
+          <table>
+            <tr>  
+                <!--Create | Edit | Delete Order-->
+                <td>
+                    <a class="btn btn-default" href="newwarehouse.html" data-toggle="tooltip" title="Create New Order"><span class="fa fa-plus" ></span></a>
+                    <button class="btn btn-danger" ><i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Order"></i></button>
+                    <button id="exportButton" class="btn btn-primary"><i class="fa fa-file-pdf-o" data-toggle="tooltip" title="Generate PDF"></i></button>
+                </td>
+                
+                <!--Input Search Text-->
+                <td><input type="search" name ="search" class="form-control" style="width:auto" placeholder="Search..." id="inputSearchOrder"></td>
+    
+                <!--Search options-->
+                <td>
+                    <select class="form-control" style="width:auto; margin:2px 0px" id="optionSearchOrder">
+                      <span class="input-group-addon"><span class="glyphicon"></span>
+                        <option value="1">Order ID</option>
+                        <option value="2">Order Description</option>
+                        <option value="3">Assigned Sales Person</option>
+                    </select>
+                </td>
+                
+                <!--On-click search button-->
+                <td><button type="button" onclick="showSearchOrder()" class="btn btn-primary"><i class="fa fa-search"></i></button></td>
+                
+            </tr>  
+          </table>
+        
+        <br/><br/>
+        
+            <!--display a table to load all the customer by default. in case of searching, load the result of the search-->
+            <div class="container" id="tableResultSearchOrder">
+                <?php
+                    //load all the order by default
+                    //run sql to select all the order
+                    $sql = "SELECT customer_order.order_id, customer_order.order_create_date, customer_order.order_create_time, customer_order.order_status, customer_order.customer_id, customer.customer_name, order_line.order_line_id, order_line.order_line_item_id, item.item_name, order_line.order_line_item_quantity, order_line.order_line_item_total_value FROM customer_order
+                        JOIN customer
+                        ON customer_order.customer_id =customer.customer_id
+                        JOIN order_line
+                        ON customer_order.order_id = order_line.order_id
+                        JOIN item
+                        ON order_line.order_line_item_id = item.item_id";
+                    
+                    //connect to db via $db and execute the sql
+                    $result = mysqli_query($db, $sql);
+        
+                    //if the number of results is greater than 0, generate a table and load the data to its rows
+                    if (mysqli_num_rows($result) > 0) {
+                    echo "
+                    
+                        <!--generate a table-->
+                        <table id='exportTable'>
+                            <tr>
+                                <th></th>
+                                <th>Order ID</th>
+                                <th>Creation date</th>
+                                <th>Creation time</th>
+                                <th>Status</th>
+                                <!--<th>Customer ID</th>-->
+                                <th>Customer name</th>
+                                <th>Order line ID</th>
+                                <th>Order line item ID</th>
+                                <th>Item name</th>
+                                <th>Quantity</th>
+                                <th>Total value</th>
+                            </tr>";
+                        // output data of each row
+                        while($row = mysqli_fetch_assoc($result)) {
+                        echo "
+                        <tr>
+                            <td><input type=" . "checkbox></td>
+                            <td>" . $row['order_id']. "</td>
+                            <td>" . $row['order_create_date']. "</td>
+                            <td>" . $row['order_create_time']. "</td>
+                            <td>" . $row['order_status']. "</td>
+                            <td>" . $row['customer_id']. "</td>
+                            <td>" . $row['customer_name']. "</td>
+                            <td>" . $row['order_line_id']. "</td>
+                            <td>" . $row['order_line_item_id']. "</td>
+                            <td>" . $row['item_name']. "</td>
+                            <td>" . $row['order_line_item_quantity']. "</td>
+                            <td>" . $row['order_line_item_total_value']. "</td>
+                        </tr>";
+                        }
+                        echo "</table>";
+                    } else {
+                    echo "0 results";
+                    }
+            
+                    mysqli_close($db); // Closing Connection
+                ?>
+            </div>
+        </div>
+        
+<link rel="stylesheet" type="text/css" href="http://www.shieldui.com/shared/components/latest/css/light/all.min.css" />
+<script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
+<script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/jszip.min.js"></script>        
+
+<script type="text/javascript">
+    jQuery(function ($) {
+        $("#exportButton").click(function () {
+            // parse the HTML table element having an id=exportTable
+            var dataSource = shield.DataSource.create({
+                data: "#exportTable",
+                schema: {
+                    type: "table",
+                    fields: {
+                        order_id: { type: Number },
+                        order_create_date: { type: String },
+                        order_create_time: { type: String },
+                        order_status: { type: String },
+                        customer_id: { type: Number },
+                        customer_name: { type: String },
+                        order_line_id: { type: Number },
+                        order_line_item_id: { type: Number },
+                        item_name: { type: String },
+                        order_line_item_quantity: { type: Number },
+                        order_line_item_total_value: { type: Number }
+                    }
+                }
+            });
+
+            // when parsing is done, export the data to PDF
+            dataSource.read().then(function (data) {
+                var pdf = new shield.exp.PDFDocument({
+                    author: "PrepBootstrap",
+                    created: new Date()
+                });
+
+                pdf.addPage("a4", "portrait");
+
+                pdf.table(
+                    50,
+                    50,
+                    data,
+                    [
+                        { field: "order_id", title: "Order ID", width: 50 },
+                        { field: "order_create_date", title: "Creation date", width: 50 },
+                        { field: "order_create_time", title: "Creation time", width: 50 },
+                        { field: "order_status", title: "Status", width: 50 },
+                        { field: "customer_id", title: "Customer ID", width: 50 },
+                        { field: "customer_name", title: "Customer name", width: 50 },
+                        { field: "order_line_id", title: "Order line ID", width: 50 },
+                        { field: "order_line_item_id", title: "Order line item ID", width: 50 },
+                        { field: "item_name", title: "Item name", width: 50 },
+                        { field: "order_line_item_quantity", title: "Quantity", width: 50 },
+                        { field: "order_line_item_total_value", title: "Total value", width: 50 }
+                    ],
+                    {
+                        margins: {
+                            top: 50,
+                            left: 50
+                        }
+                    }
+                );
+
+                pdf.saveAs({
+                    fileName: "PrepBootstrapPDF"
+                });
+            });
+        });
+    });
+</script>
+        
+    </body>
+</html>

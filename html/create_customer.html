@@ -1,0 +1,256 @@
+<?php
+//include the definition of database
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/controllers.js"></script>
+
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+
+    <div class="row">
+        <!--establish the form for customer, the form will perform validation, after that, search function -->
+        <form role="form" name="myForm" action="../php/create_customer.php" method="post">
+
+            <!--define the title of the form + the note for * symbol-->
+            <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
+                <h2 class="text-center">Customer</h2>
+                <div class="well well-sm"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+
+                <!--draw a outside border + display form legend-->
+                <fieldset>
+                    <legend>Basic Information</legend>
+
+                    <!--display the required fields-->
+                    <!--display customer name-->
+                    <div class="form-group">
+                        <label>Customer Name</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="customer_name" placeholder="Customer Name"  required>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Customer Long Name</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="customer_long_name" placeholder="Customer Long Name" required>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+
+                    <!--display customer billing address-->
+                    <div class="form-group">
+                        <label>Customer Billing Address</label>
+
+                        <!--display customer billing address street + city + country-->
+                        <div class="row">
+
+                            <!--display customer billing address street-->
+                            <div class="form-group col-md-12">
+                                <label>Street</label>
+                                <div class="input-group">
+                                    <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_street" placeholder="Street" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display customer billing address city-->
+                            <div class="form-group col-md-7">
+                                <label>City</label>
+                                <div class="input-group">
+                                    <input type="text" style="min-width:90%" class="form-control" name="customer_billing_address_city" placeholder="City" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display customer billing address country-->
+                            <div class="form-group col-md-5">
+                                <label>Country</label>
+                                <div class="input-group">
+                                    <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_country" placeholder="Country" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--display customer tax code-->
+                    <div class="form-group">
+                        <label>Customer Tax Code</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="customer_tax_code" placeholder="Customer Tax Code" required>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+
+                    <!--display customer accountable salesperson + responsible supervisor-->
+                    <div class="form-group">
+                        <label>Salesperson Accountable</label>
+                        <div class="input-group">
+                            <input type="hidden" class="form-control" name="staff_name" placeholder="Salesperson Accountable" required>
+                            <input type="number" class="form-control" name="staff_id" placeholder="Staff ID">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+
+                    <!--display customer description-->
+                    <div class="form-group">
+                        <label>Customer Status</label>
+                        <div>
+
+                            <!--set up the status of customer -->
+                            <select id="customer_status_select" class="form-control" name="customer_status">
+                                <option name="customer_status_active" value="Active" selected="selected">Active</option>
+                                <option name="customer_status_suspended" value="Suspended">Suspended</option>
+                                <option name="customer_status_deleted" value="Deleted">Deleted</option>
+                            </select>
+                            <span class="input-group-addon"><span class="glyphicon"></span></span>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!--display other details as tab + sub-tabs-->
+                <!--tab headers-->
+                <div>
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#contact" data-toggle="tab">Customer Contact Person</a></li>
+                        <li><a href="#shipping" data-toggle="tab">Shipping Address</a></li>
+                        <li><a href="#payment" data-toggle="tab">Payment</a></li>
+                    </ul>
+
+                    <!--sub-tab Contact person-->
+                    <div class="tab-content ">
+                        <div class="tab-pane active" id="contact">
+                            <!--<legend>Contact Person</legend>-->
+
+                            <!--contact person name-->
+                            <div class="form-group" style="margin-top: 15px !important;">
+                                <label>Contact Person Name</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="customer_contact_person_name" placeholder="Contact person Name" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--contact person phone number-->
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="customer_contact_person_phone_number" placeholder="Phone Number" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--contact person email address-->
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="customer_contact_person_email" placeholder="Email Address" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--tab Customer shipping address-->
+                        <div class="tab-pane" id="shipping">
+                            <div class="form-group" style="margin-top: 15px !important;">
+
+                                <!--display customer shipping address street + city + country-->
+                                <div class="row">
+
+                                    <!--display customer shipping address street-->
+                                    <div class="form-group col-md-12">
+                                        <label>Street</label>
+                                        <div class="input-group">
+                                            <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_street" placeholder="Street" required>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+
+                                    <!--display customer shipping address city-->
+                                    <div class="form-group col-md-7">
+                                        <label>City</label>
+                                        <div class="input-group">
+                                            <input type="text" style="min-width:90%" class="form-control" name="customer_shipping_address_city" placeholder="City" required>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+
+                                    <!--display customer shipping address country-->
+                                    <div class="form-group col-md-5">
+                                        <label>Country</label>
+                                        <div class="input-group">
+                                            <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_country" placeholder="Country" required>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="clear"></div>
+
+                            </div>
+                        </div>
+
+                        <!--sub-tab payment term + details-->
+                        <div class="tab-pane" id="payment">
+                            <!--<legend>Payment</legend>-->
+
+                            <!--credit limit-->
+                            <div class="form-group" style="margin-top: 15px !important;">
+                                <label>Customer Credit Limit</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="customer_credit_limit" placeholder="Customer Credit Limit"required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--customer payment-->
+                            <!--<div class="form-group">-->
+                            <!--<label>Customer Payment</label>-->
+                            <!--<div class="input-group">-->
+                            <!--<input type="text" class="form-control" name="customer_payment" placeholder="Customer Payment" value="<?php echo $customer_payment; ?>" required>-->
+                            <!--<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>-->
+                            <!--</div>-->
+                            <!--</div>-->
+
+                            <!--customer payment term -->
+                            <div class="form-group">
+                                <label>Customer Payment Term</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="customer_payment_term" placeholder="Customer Payment Term" required>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--submit button-->
+                <input type="submit" name="submit" id="submit" value="Create" class="btn btn-default pull-right">
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="footer"></div>
+
+</body>
+</html>
