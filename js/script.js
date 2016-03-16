@@ -4,6 +4,6 @@ $(function(){
   $("#tabItem").load("partials/item.html");
   $("#tabWarehouse").load("partials/warehouse.html"); 
   $("#tabCustomer").load("/html/customer.html");
-  $("#tabOrder").load("/html/order.1.html");
+  $("#tabOrder").load("/html/order.html");
 
 });
