@@ -1,9 +1,10 @@
 $(function(){
-  $("#header").load("/html/partials/navigation.html");
-  $("#footer").load("/html/partials/footer.html");
-  $("#tabItem").load("partials/item.html");
-  $("#tabWarehouse").load("partials/warehouse.html"); 
-  $("#tabCustomer").load("/html/customer.html");
-  $("#tabOrder").load("/html/order.html");
+  $("#header").load("../html/partials/navigation.html"); 
+  $("#footer").load("../html/partials/footer.html"); 
+  $("#tabItem").load("item.html");
+  $("#tabWarehouse").load("warehouse.html"); 
+  $("#tabCustomer").load("customer.html");
+  $("#tabOrder").load("order.html");
+  $("#tabQuotation").load("quotation.html");
 
 });

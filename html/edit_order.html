@@ -1,231 +1,437 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../css/bootstrap.min.css">
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
-  <script src="../js/jquery-2.1.4.min.js"></script>
-  <script src="../js/bootstrap.min.js"></script>
-  <script src="../js/script.js"></script>
-  <script src="../lib/angular/angular.min.js"></script>
-  <script src="../js/controllers.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/moment.js"></script>
+    <script src="../js/displayCustomerDetails.js"></script>
+
 </head>
 <body>
 
 <div id="header"></div>
 
 <div class="container">
+
     <div class="row">
-        <form role="form" onSubmit="../php/send_order.php" method="post">
+
+        <?php
+            //get the desired customer by customer_id in URL
+            if (isset($_GET['order_id'])) {
+                //get the param in URL of customer_id
+                $edit_order_id = $_GET['order_id'];
+
+                //echo $edit_order_id;
+
+                //load all the order by default
+                //run sql to select all the order
+                $sql = "SELECT *, customer.customer_id, customer_name FROM customer_order
+                    JOIN customer
+                        ON customer_order.customer_id = customer.customer_id
+                    WHERE customer_order.order_id = '$edit_order_id'";
+
+                //connect to db via $db and execute the sql
+                $result = mysqli_query($db, $sql);
+
+                //fetch the result to an array
+                $row = mysqli_fetch_assoc($result);
+
+                //if no value, set the text to N-A
+                $orderReference = $row['order_reference'];
+                if ($row['order_reference'] == 0){
+                    $orderReference = "No Quotation";
+                }
+            }
+        ?>
+
+        <form role="form" name="myForm" action="../php/edit_order.php" method="post">
             <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
-                    <h2 class="text-center">Order</h2>
-                <div class="well well-sm"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+
+                <h2 class="text-center">Order</h2>
+                <!-- define the note for * symbol-->
+                <div class="well well-sm col-md-4 text-center">
+                    <strong>
+                        <span class="glyphicon glyphicon-asterisk"></span>
+                        Required Field
+                    </strong>
+                </div>
+
+                <!-- display the order ID -->
+                <div class="well well-sm col-md-4 text-center pull-right">
+                    <strong>Order ID:
+                        <input name="order_id" value="<?php echo $edit_order_id;?>">
+                    </strong>
+                </div>
+                <div class="clearfix"></div>
+                <!--display quotation ID-->
+                <div class="well well-sm col-md-4 text-center pull-right">
+                    <strong>Quotation ID:
+                        <input style="width: 30% !important; background-color: #F5F5F5 !important; border: 0 !important;" name="order_reference" value="<?php echo $orderReference;?>">
+                        <!--source: http://stackoverflow.com/questions/2906582/how-to-create-an-html-button-that-acts-like-a-link-->
+                        <?php
+                            //if no value, hide the button the quotation page
+                            if ($row["order_reference"] != 0){
+                                echo "<a href=edit_quotation.html?quotation_id=" . $row['order_reference']. " class='btn'>View</a>";
+                        }
+                        ?>
+                    </strong>
+                </div>
+                <!--clear floating display style so that all input can display vertically-->
+                <div class="clearfix"></div>
                 <div class="form-group">
+
                     <label>Customer Name</label>
                     <div class="input-group">
-                         <select name="customer" class="form-control" required>
-                            <option selected disabled>--Please Select Customer Name--</option>
-                            <option>customer a</option>
-                            <option>customer b</option>
-                            <option>customer c</option>
-                            <option>customer d</option>
-                            <option>customer e</option>
-                          </select>
+
+                        <!--run script to set the default option of select box to be the corresponding name of customer-->
+                        <!--<script>-->
+                        <!--$(document).ready(function() {-->
+                        <!--$("#customer_name_select").val("<?php echo $row['customer_id'];?>");-->
+                        <!--});-->
+                        <!--</script>-->
+
+                        <select id="customer_id_select" name="customer_id" class="form-control" disabled>
+                            <!--<option value="0" selected disabled>&#45;&#45;Please Select Customer Name&#45;&#45;</option>-->
+
+                            <?php
+                                //Option values are added by looping through the array
+                                echo "<option value=" . $row["customer_id"] . ">" . $row["customer_name"] . "</option>";
+                            ?>
+                        </select>
+
+                        <!--store the value to a hidden input because disabled select is ignored during form posting-->
+                        <input name="customer_id" hidden value="<?php echo $row['customer_id'];?>">
+
+                        <!--run the script to load corresponding customer details based on the change of customer name-->
+                        <script>
+                            displayCustomerDetails(document.getElementById("customer_id_select").value);
+                        </script>
+
                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <p>[Customer Description]</p>
+
+                <!--Display customer information as user select from select input above-->
+                <div class="form-group" id="customer_detail_display">
+                    <p hidden>[Customer Description]</p>
                 </div>
-                <div class="row">
-                    <div class="form-group col-md-6">
-                        <label>Order Type</label>
+
+                <div class="form-group ">
+                    <label>Order Status</label>
+                    <div class="input-group">
+                        <!--run script to set the default option of select box to be the corresponding status of order-->
+                        <script>
+                            $(document).ready(function() {
+                                $("#order_status_select").val("<?php echo $row['order_status'];?>");
+                            });
+                        </script>
+
+                        <select id="order_status_select" name="order_status" class="form-control">
+                            <option selected disabled>--Please Select Order Type--</option>
+                            <option value="Processed">Processed</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+
+                    <!--Order line starts here-->
+                    <!--connect db to load order line data-->
+                    <?php
+                        $sql_order_line = "SELECT
+                            customer_order.order_id, customer_order.order_create_date, customer_order.order_create_time, customer_order.order_status, customer_order.customer_id,
+                            customer.customer_name, customer.customer_id,
+                            customer_order.order_total, customer_order.order_reference,
+                            order_line.order_line_id, order_line.order_line_item_id, order_line.order_line_item_quantity, order_line.order_line_item_total_value, order_line.order_line_deliver_date, order_line.order_line_selling_price, order_line.order_line_net_selling_price,
+                            item.item_name,item.item_unit_of_measurement, item.item_vendor, item.item_manufacturer, item.item_unit_price, item.item_VAT
+                        FROM customer_order
+                        JOIN customer
+                            ON customer_order.customer_id =customer.customer_id
+                        JOIN order_line
+                            ON customer_order.order_id = order_line.order_id
+                        JOIN item
+                            ON order_line.order_line_item_id = item.item_id
+                        WHERE customer_order.order_id = '$edit_order_id'";
+
+                        //run the query to get the required details
+                        $query_order_line = mysqli_query($db,$sql_order_line) or die ("Error: Cannot found order lines");
+                    ?>
+
+                    <!--Dynamic Form Processing with PHP-->
+                    <div class="form-group">
+                        <legend>Order Line</legend>
+                        <input type="button" value="Add New Order Line" onClick="addRow('dataTableOrder')" />
+                        <input type="button" value="Remove Checked Order Line" onClick="deleteRow('dataTableOrder')"  />
+                        <p>(All acions apply only to entries with check marked check boxes only.)</p>
+                        <div id="myForm_errorloc" class="error"></div>
+                        <table id="dataTableOrder" class="table">
+                            <tr>
+                                <th></th>
+                                <th>
+                                    <label>Order Line ID</label>
+                                </th>
+                                <th>
+                                    <label>Item Name</label>
+                                </th>
+                                <th>
+                                    <label>Manufacturer</label>
+                                </th>
+                                <th>
+                                    <label>Quantity</label>
+                                </th>
+                                <th>
+                                    <label>Vendor</label>
+                                </th>
+                                <th>
+                                    <label>Delivery Date</label>
+                                </th>
+                                <th hidden>
+                                    <label>Total value</label>
+                                </th>
+                                <th>
+                                    <label>Selling price</label>
+                                </th>
+                                <th>
+                                    <label>Net selling price</label>
+                                </th>
+                                <th>
+                                    <label>Tax</label>
+                                </th>
+                            </tr>
+
+                            <!--start to load and display the order lines of this order-->
+                            <?php
+                            //fetch the result to an array
+                            // multidimension array source: http://www.w3schools.com/php/php_arrays_multi.asp
+                            while($row_order_line = mysqli_fetch_assoc($query_order_line)){
+                                $array_order_line[] = $row_order_line;}
+                            //for each element of array, load a different record
+                            for ($array_count = 0; $array_count < count($array_order_line); $array_count++){
+                            ?>
+
+                            <tr>
+                                <td id="row-<?php echo $array_count;?>_col-0"><input type="checkbox"  name="chk[]"/></td>
+                                <td id="row-<?php echo $array_count;?>_col-1">
+                                    <input type="text" style="width:90%"  name="order_line_id[]" value="<?php echo $array_order_line[$array_count]['order_line_id'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-2">
+                                    <!--load all the item in the item table. display item name and store item id as value of option -->
+                                    <select id="item_id_select_<?php echo $array_count;?>" name="item_id[]" onchange="displayItemDetails(document.getElementById(this.id).value, this.id)">
+                                        <?php
+                                            //set up sql query to list all items
+                                            $sql_item_select = "SELECT item_id, item_name FROM item";
+                                            //connect to db via $db and execute the sql
+                                            $result_item_select = mysqli_query($db, $sql_item_select);
+                                            //fetch the result to an array
+                                            while($row_item_select = mysqli_fetch_assoc($result_item_select))
+                                            {
+                                                $selected = ($row_item_select['item_id'] == $array_order_line[$array_count]['order_line_item_id']) ? "selected='selected'" : "";
+                                                echo "<option value=" . $row_item_select['item_id'] . " " . $selected . ">" . $row_item_select['item_name'] . "</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <!--<?php echo $array_order_line[$array_count]['item_name'];?>-->
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-3">
+                                    <input type="text" style="width:90%"  name="item_manufacturer[]" value="<?php echo $array_order_line[$array_count]['item_manufacturer'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-4">
+                                    <input type="text" style="width:90%"  name="order_line_item_quantity[]" min="0" value="<?php echo $array_order_line[$array_count]['order_line_item_quantity'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-5">
+                                    <input type="text" style="width:90%"  name="item_vendor[]" value="<?php echo $array_order_line[$array_count]['item_vendor'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-6">
+                                    <input type="date" style="width:90%" name="order_line_delivery_date[]" value="<?php echo date('Y-m-d', strtotime((string)$array_order_line[$array_count]['order_line_deliver_date']));?>">
+                                    <!--<?php echo date('Y/m/d', strtotime($array_order_line[$array_count]['order_line_deliver_date']));?>-->
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-7" hidden>
+                                    <input hidden type="text" style="width:90%"  name="order_line_total_value[]" value="<?php echo $array_order_line[$array_count]['order_line_item_total_value'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-8">
+                                    <input type="text" style="width:90%" name="order_line_selling_price[]" min="0" value="<?php echo $array_order_line[$array_count]['item_unit_price'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-9">
+                                    <input type="text" style="width:90%" name="order_line_net_selling_price[]" min="0" value="<?php echo $array_order_line[$array_count]['order_line_net_selling_price'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-10">
+                                    <input type="text" style="width:90%" name="item_VAT[]" value="<?php echo $array_order_line[$array_count]['item_VAT'];?>" >
+                                </td>
+                            </tr>
+                            <?php } ?>
+                        </table>
+                        <div class="clear"></div>
+                        <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
+                    </div>
+
+                    <div class="form-group">
+                        <label>Note</label>
                         <div class="input-group">
-                            <select name="order_type" class="form-control" required>
-                                <option selected disabled>--Please Select Order Type--</option>
-                                <option>Quotation</option>
-                                <option>Ordered</option>
-                            </select>
-                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            <textarea name="order_note" class="form-control" rows="2"><?php echo $row['order_note'];?></textarea>
+                            <span class="input-group-addon"><span class="glyphicon"></span></span>
                         </div>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label>Order Status</label>
-                        <div class="input-group">
-                             <select name="order_status" class="form-control" required>
-                                <option selected disabled>--Please Select Order Type--</option>
-                                <option>Processed</option>
-                                <option>Shipped</option>
-                                <option>Delivered</option>
-                              </select>
-                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                        </div>
+
+                    <div class="form-group pull-right">
+                        <table>
+                            <tr>
+                                <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
+                                <td> <input name="net_total_price" value=""> </td>
+                            </tr>
+                            <tr>
+                                <td class="text-right"><label>Tax:</label></td>
+                                <td> <input name="tax" value=""> </td>
+                            </tr>
+                            <tr>
+                                <td class="text-right"><label>Total Price (Tax incl):</label></td>
+                                <td> <input name="total_price" value=""> </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
+                        <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
                     </div>
                 </div>
-                <!--Dynamic Form Processing with PHP-->
-                <div class="form-group">
-                    <legend>Order Line</legend>
-    				<p> 
-    					<input type="button" value="Add New Order Line" onClick="addRow('dataTable')" /> 
-    					<input type="button" value="Remove Checked Order Line" onClick="deleteRow('dataTable')"  /> 
-    					<p>(All acions apply only to entries with check marked check boxes only.)</p>
-    				</p>
-                   <table id="dataTable" class="form" border="1">
-                       <tr>
-                           <p>
-                           <th></th>
-                           <th>
-                               <label>Item ID</label>
-                           </th>
-                           <th>
-                               <label>Item Name</label>
-                           </th>
-                           <th>
-                               <label>Quantity</label>
-                           </th>
-                           <th>
-                               <label>Vendor</label>
-                           </th>
-                           <th>
-                               <label>Delivery Date</label>
-                           </th>
-                           <th>
-                               <label>Suggest Price</label>
-                           </th>
-                           <th>
-                               <label>Selling price</label>
-                           </th>
-                           <th>
-                               <label>Net selling price</label>
-                           </th>
-                           <th>
-                               <label>Tax</label>
-                           </th>
-                           </p>
-                       </tr>
-                        <tr>
-                          <p>
-    						<td><input type="checkbox"  name="chk[]"/></td>
-    						  <td>
-    							<select id="item_id" name="item_id[]" >
-    								<option>....</option>
-    								<option>item name 1</option>
-    								<option>item name 2</option>
-    								<option>item name 3</option>
-    							</select>
-    						 </td>
-                            <td>
-                                <input type="text" style="width:90%"  name="item_name[]" disabled>
-                            </td>
-                            <td>
-    							<input type="number" style="width:90%"  name="order_line_item_quantity[]" min="0">
-    					    </td>
-                            <td>
-                                <input type="text" style="width:90%"  name="item_vendor[]" disabled>
-                            </td>
-                            <td>
-                                <input type="date" style="width:90%" name="order_line_delivery_date[]">
-                            </td>
-                            <td>
-                                <input type="text" style="width:90%"  name="item_unit_price[]" disabled>
-                            </td>
-                            <td>
-    							<input type="number" style="width:90%" name="order_line_selling_price[]" min="0">
-    						</td>
-                            <td>
-                                <input type="number" style="width:90%" name="order_line_net_selling_price[]" min="0">
-                            </td>
-                            <td>
-                                <input type="text" style="width:90%" name="item_VAT[]" disabled>
-                            </td>
-    						</p>
-                        </tr>
-                    </table>
-    				<div class="clear"></div>
-                    <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
-                </div>
-                <div class="form-group">
-                      <label>Note</label>
-                      <div class="input-group">
-                          <textarea name="customer_note" class="form-control" rows="2"></textarea>
-                          <span class="input-group-addon"><span class="glyphicon"></span></span>
-                      </div>
-                </div>
-                <div class="form-group pull-right">
-                    <table>
-                        <tr>
-                            <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
-                            <td><b>Price</b></td>
-                        </tr>
-                        <tr>
-                            <td class="text-right"><label>Tax:</label></td>
-                            <td><b>Tax</b></td>
-                        </tr>
-                        <tr>
-                            <td class="text-right"><label>Total Price (Tax incl):</label></td>
-                            <td><b>Price</b></td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="clearfix"></div>
-                <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
-                    <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
-                </div>
-        </div>
+            </div>
         </form>
     </div>
 </div>
 
 <div id="footer"></div>
 
-<script>
-/**
- * Projet Name : Dynamic Form Processing with PHP
- * URL: http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP
- *
- * Licensed under the MIT license.
- * http://www.opensource.org/licenses/mit-license.php
- * 
- * Copyright 2013, Tech Stream
- * http://techstream.org
- */
+<!--script to validate inputs-->
+<!--Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+<script language="JavaScript" type="text/javascript">
+    //You should create the validator only after the definition of the HTML form
 
-function addRow(tableID) {
-	var table = document.getElementById(tableID);
-	var rowCount = table.rows.length;
-	if(rowCount < 10){							// limit the user from creating fields more than your limits
-		var row = table.insertRow(rowCount);
-		var colCount = table.rows[0].cells.length;
-		for(var i=0; i<colCount; i++) {
-			var newcell = row.insertCell(i);
-			newcell.innerHTML = table.rows[1].cells[i].innerHTML;
-		}
-	}else{
-		 alert("Maximum Passenger per ticket is 5.");
-			   
-	}
-}
+    var frmvalidator  = new Validator("myForm");
+    frmvalidator.EnableOnPageErrorDisplaySingleBox();
+    frmvalidator.EnableMsgsTogether();
 
-function deleteRow(tableID) {
-	var table = document.getElementById(tableID);
-	var rowCount = table.rows.length;
-	for(var i=0; i<rowCount; i++) {
-		var row = table.rows[i];
-		var chkbox = row.cells[0].childNodes[0];
-		if(null != chkbox && true == chkbox.checked) {
-			if(rowCount <= 1) { 						// limit the user from removing all the fields
-				alert("Cannot Remove all the Passenger.");
-				break;
-			}
-			table.deleteRow(i);
-			rowCount--;
-			i--;
-		}
-	}
-}
+    frmvalidator.addValidation("order_line_item_quantity[]","req","Please select quantity");
+    frmvalidator.addValidation("order_line_delivery_date[]","req","Please select date of delivery");
+    frmvalidator.addValidation("order_line_selling_price[]","req","Please select selling price");
+    frmvalidator.addValidation("item_VAT[]","req","Please enter Tax Percentage");
+
+    /**
+     * Projet Name : Dynamic Form Processing with PHP
+     * URL: http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP
+     *
+     * Licensed under the MIT license.
+     * http://www.opensource.org/licenses/mit-license.php
+     *
+     * Copyright 2013, Tech Stream
+     * http://techstream.org
+     */
+
+    function addRow(tableID) {
+        var table = document.getElementById(tableID);   //set an table object by selecting the element from the given param
+        var rowCount = table.rows.length;               //count the number of rows of table
+        //alert(rowCount);
+        var maxRowCount = 10;                           // set up the maximum number of row
+        var selectLocation = 2;                         // set up the location of select
+        if(rowCount < maxRowCount){						// limit the user from creating fields more than your limits
+            var row = table.insertRow(rowCount);        // insert a new row
+            var colCount = table.rows[0].cells.length;  // get the number of columns to limit the loop
+            for(var i=0; i<colCount; i++) {             // a loop to insert new cells and set up new ID for each cell and the select
+                var newCell = row.insertCell(i);        // insert a new cell
+                var rowIndexId = rowCount - 1;          // get the row index
+                newCell.id = "row-" + rowIndexId + "_col-" + i; // set up new ID
+                if (i == selectLocation) {              // find the select box column location
+                    var newStr = function(){            // run a function to create new id, find & replace old id
+                        var newID = "item_id_select_" + rowIndexId; //set up new id for select box
+                        var str = table.rows[1].cells[i].innerHTML.replace("item_id_select_0", newID); // replace the old id in innerHTML
+                        return str;
+                    };
+                    newCell.innerHTML = newStr();       // write the updated innerHTML to the column containing the select
+                }
+                else {
+                    newCell.innerHTML = table.rows[1].cells[i].innerHTML; // if the column does not contain select box, duplicate the previous one
+                }
+            }
+        }else{
+            // display message if reaching the maximum number of order lines
+            alert("Maximum order line per order is " + maxRowCount + "!");
+
+        }
+    }
+
+    /**
+     function: deleteRow(tableID)
+     purpose: delete rows that have checked checkboxes and update ids for elements correspondingly
+     inputs: tableID
+     outputs: none
+     */
+    function deleteRow(tableID) {
+
+        //set an table object by selecting the element from the given param
+        var table = document.getElementById(tableID);
+        //count the number of rows of table
+        var rowCount = table.rows.length;
+
+        // a loop to catch the selected checkboxes and remove the row correspondingly
+        for(var i=0; i<rowCount; i++) {
+            // set a row object for the current row in the loop
+            var row = table.rows[i];
+            // get the checkbox's value
+            var chkBox = row.cells[0].childNodes[0];
+            // remove the rows that have checked checkbox but do not remove all the row
+            if(null != chkBox && true == chkBox.checked) {
+                if(rowCount <= 1) { 						// limit the user from removing all the fields
+                    alert("Cannot Remove all the order lines.");
+                    break;
+                }
+                // delete the corresponding row
+                table.deleteRow(i);
+                rowCount--;
+                i--;
+            }
+        }
+
+        // a loop to update the current lines' ids
+        for(var j=1; j<rowCount; j++) {
+            // get the maximum of number of columns
+            var colCount = table.rows[0].cells.length;
+            // set the new row index to match the array value
+            var rowIndexIdRemake = j -1;
+            // a loop to update ids
+            for(var m=0; m<colCount; m++) {
+                // get the old id
+                var oldCellId = table.rows[j].cells[m].id;
+                // if the column does not contain select box, update id of cell only
+                if (m!==2){
+                    table.rows[j].cells[m].id = "row-" + rowIndexIdRemake + "_col-" +m;
+                }
+                else {
+                    // update the cell id and select id
+                    table.rows[j].cells[m].id = "row-" + rowIndexIdRemake + "_col-" + m;
+                    // set new select id
+                    var selectNewId = "item_id_select_" + rowIndexIdRemake;
+                    // catch the old id
+                    var numberOfRow = oldCellId.slice(4,5);
+                    var selectOldId = "item_id_select_" + numberOfRow;
+                    // change the id of the select
+                    $("#" + selectOldId).attr("id",selectNewId);
+                }
+            }
+        }
+    }
+
 </script>
 </body>
 </html>

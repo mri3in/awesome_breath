@@ -72,4 +72,5 @@
     {
         echo "<script type='text/javascript'> alert (\"Failed to add customer\")</script>";
     }
+header("Location:../html/sale.html#customer?createCustomer=1");
 ?>

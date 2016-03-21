@@ -8,6 +8,8 @@
     <head>
         <!--include the search JS-->
         <script src="../js/showSearchCustomer.js"></script>
+        <script src="../js/customerTable.js"></script>
+		<script src="../js/deleteCustomer.js"></script>
 
         <!--disable enter key on the form in this page-->
         <script>
@@ -20,10 +22,30 @@
                     }
                 });
             });
+
+
         </script>
+		<script>// Javascript to enable link to tab
+		//ref "Go to Tab on Page Reload" http://www.bootply.com/rg7f7CLlFR
+$('#myTab a').click(function (e) {
+	 e.preventDefault();
+	 $(this).tab('show');
+});
+		var hash = document.location.hash;
+var prefix = "tab_";
+if (hash) {
+    $('.nav-tabs a[href='+hash.replace(prefix,"")+']').tab('show');
+} 
+
+// Change hash for page-reload
+$('.nav-tabs a').on('shown.bs.tab', function (e) {
+    window.location.hash = e.target.hash.replace("#", "#" + prefix);
+});
+</script>
     </head>
     
     <body>
+	<form name="frmCustomer" method="POST" action ="">
         <div class="container">
           <!--Page Title-->
           <h1>Customer</h1><br/>
@@ -33,8 +55,9 @@
                 <tr>
                     <!--create button for creating new customer | delete customer-->
                     <td>
-                        <a class="btn btn-default" data-toggle="tooltip" title="Create New Customer">
-                        <span class="fa fa-plus" ></span></a> <button class="btn btn-danger"><i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Order"></i></button>
+                        <a class="btn btn-default" data-toggle="tooltip" title="Create New Customer" href="create_customer.html">
+                        <span class="fa fa-plus" ></span></a> 
+						<button class="btn btn-danger" name="delete" value="Delete"  onClick="setDeleteCustomerAction();" ><i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Order"></i></button>
                     </td>    
                         
                     <!--integrate search options, search input field, search button-->
@@ -61,11 +84,11 @@
             <br/><br/>
 
             <!--display a table to load all the customer by default. in case of searching, load the result of the search-->
-            <div class="container" id="tableResultSearchCustomer">
+            <div class="container scrolltable" id="tableResultSearchCustomer">
                 <?php
                     //load all the customer by default
                     //run sql to select all the customer
-                    $sql = "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id";
+                    $sql = "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_status <> 'Deleted'";
 
                     //connect to db via $db and execute the sql
                     $result = mysqli_query($db, $sql);
@@ -73,32 +96,37 @@
                     //if the number of results is greater than 0, generate a table and load the data to its rows
                     if (mysqli_num_rows($result) > 0) {
                     echo "
-                        <table class=" . "table-striped>" . "
+                        <table class='table' id='customerTable'>" . "
                         <tr>
                             <th></th>
-                            <!--
-                            <th>Customer ID</th>
-                            -->
+                            <!--<th>Customer ID</th>-->
                             <th>Customer Name</th>
                             <!--<th>Customer Long Name</th>-->
-                            <th>Customer Billing Address</th>
-                            <th>Customer Shipping Address</th>
-                            <th>Customer Tax Code</th>
-                            <th>Customer Credit Limit</th>
-                            <th>Customer Payment Term</th>
+                            <th>Billing Address</th>
+                            <!--<th>Shipping Address</th>
+                            <th>Tax Code</th>
+                            <th>Credit Limit</th>
+                            <th>Payment Term</th>-->
                             <th>Responsible Staff Name</th>
-                            <th>Customer Contact Person Name</th>
-                            <th>Customer Contact Person Phone Number</th>
-                            <th>Customer Contact Person Email</th>
+                            <th>Contact Person Name</th>
+                            <th>Contact Person Phone Number</th>
+                            <th>Contact Person Email</th>
                             <th>Customer Status</th>
 
                         </tr>";
 
                         //fetch the results to table rows, the customer_name should have the link to the edit page
+                        $i=0;
                         while ($row = mysqli_fetch_array($result)) {
+						if($i%2==0)
+						$classname="evenRow";
+						else
+						$classname="oddRow";
+						if(isset($classname));
                             echo
                             "<tr id=" . "link>" . "
-                            <td><input type=" . "checkbox></td>
+                            <td><input type=" . "checkbox name='customer[]' 
+							value =".$row['customer_id']."></td>
                             <!--
                             <td>
                                <a href=" . "edit_customer.html?customer_id=" . $row["customer_id"] .">
@@ -112,16 +140,17 @@
                                 </a>
                             </td>
                             <td>" . $row["customer_billing_address"]. "</td>
-                            <td>" . $row["customer_shipping_address"]. "</td>
+                            <!--<td>" . $row["customer_shipping_address"]. "</td>
                             <td>" . $row["customer_tax_code"]. "</td>
                             <td>" . $row["customer_credit_limit"]. "</td>
-                            <td>" . $row["customer_payment_term"]. "</td>
+                            <td>" . $row["customer_payment_term"]. "</td>-->
                             <td>" . $row["staff_name"]. "</td>
                             <td>" . $row["customer_contact_person_name"]. "</td>
                             <td>" . $row["customer_contact_person_phone_number"]. "</td>
                             <td>" . $row["customer_contact_person_email"]. "</td>
                             <td>" . $row["customer_status"]. "</td>
                         </tr>";
+						$i++;
                         }
 
                         //close the table

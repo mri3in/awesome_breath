@@ -105,8 +105,24 @@ include('../config.php');
                     <div class="form-group">
                         <label>Salesperson Accountable</label>
                         <div class="input-group">
-                            <input type="hidden" class="form-control" name="staff_name" placeholder="Salesperson Accountable" required>
-                            <input type="number" class="form-control" name="staff_id" placeholder="Staff ID">
+                            <!--select staff on the list-->
+                            <select id="staff_id_select" name="staff_id" class="form-control">
+                                <option value="0" selected disabled>--Please Select Salesperson Accountable--</option>
+                                <?php
+                                    //get the desired staff by staff_id in URL
+
+                                    //set up the sql to select the record that has the corresponding staff_id
+                                    $sql_staff_select = "SELECT staff.staff_name,staff.staff_id FROM staff";
+        
+                                    //run the query to get the staff
+                                    $query_staff_select = mysqli_query($db,$sql_staff_select);
+        
+                                    //fetch the result to an array
+                                    while($row_staff_select = mysqli_fetch_assoc($query_staff_select)) {
+                                        echo "<option value=".$row_staff_select["staff_id"].">".$row_staff_select["staff_name"]."</option>";
+                                    }
+                                ?>
+                            </select>
                             <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                         </div>
                     </div>

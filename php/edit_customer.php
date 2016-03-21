@@ -38,5 +38,6 @@
 
     //if success, echo the success message
     echo "successfully edit customer name = " . $_POST['customer_name'];
-
+    // redirect to customer tab
+    header("Location:../html/sale.html#customer?editCustomer=1");
 ?>
