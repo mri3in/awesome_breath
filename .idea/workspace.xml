@@ -1,20 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="88b91c88-eb91-4ed8-a1ed-aa546f9736c1" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/searchItem.php" />
+    <list default="true" id="88b91c88-eb91-4ed8-a1ed-aa546f9736c1" name="Default" comment="sprint 4 complete">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/html/create_customer.html" afterPath="$PROJECT_DIR$/html/create_customer.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/html/customer.html" afterPath="$PROJECT_DIR$/html/customer.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/html/edit_order.html" afterPath="$PROJECT_DIR$/html/edit_order.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/html/order.html" afterPath="$PROJECT_DIR$/html/order.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/html/partials/footer.html" afterPath="$PROJECT_DIR$/html/partials/footer.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/html/sale.html" afterPath="$PROJECT_DIR$/html/sale.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/createcustomervalidation.js" afterPath="$PROJECT_DIR$/js/createcustomervalidation.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/script.js" afterPath="$PROJECT_DIR$/js/script.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/php/create_customer.php" afterPath="$PROJECT_DIR$/php/create_customer.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/php/edit_customer.php" afterPath="$PROJECT_DIR$/php/edit_customer.php" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/php/searchCustomer.php" afterPath="$PROJECT_DIR$/php/searchCustomer.php" />
     </list>
     <ignored path="BREATH.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -61,8 +49,8 @@
       <file leaf-file-name="displayCustomerDetails.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/displayCustomerDetails.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.3498695">
-              <caret line="100" column="0" selection-start-line="100" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.37336814">
+              <caret line="80" column="55" selection-start-line="80" selection-start-column="55" selection-end-line="80" selection-end-column="55" />
               <folding />
             </state>
           </provider>
@@ -268,7 +256,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$USER_HOME$/Desktop/GitHub.appref-ms" />
-    <property name="settings.editor.selected.configurable" value="vcs.Subversion" />
+    <property name="settings.editor.selected.configurable" value="reference.settings.ide.settings.file-colors" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="SearchEverywhereHistoryKey" value="create_customer.php&#9;FILE&#9;file://D:/xampp/htdocs/project/breath/php/create_customer.php" />
@@ -360,6 +348,13 @@
       <option name="number" value="Default" />
       <updated>1450338329835</updated>
     </task>
+    <task id="LOCAL-00001" summary="sprint 4 complete">
+      <created>1458540758518</created>
+      <option name="number" value="00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1458540758518</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -368,6 +363,7 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21785174" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32843137" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -414,6 +410,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="sprint 4 complete" />
+    <option name="LAST_COMMIT_MESSAGE" value="sprint 4 complete" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -700,6 +700,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.154122">
           <caret line="26" column="43" selection-start-line="26" selection-start-column="43" selection-end-line="26" selection-end-column="43" />
+          <folding>
+            <marker date="1458331374351" expanded="true" signature="1072:1199" placeholder="SELECT *, st... customer" />
+            <marker date="1458331374351" expanded="true" signature="1378:1531" placeholder="SELECT *, st... customer" />
+            <marker date="1458331374351" expanded="true" signature="1723:1880" placeholder="SELECT *, st... customer" />
+            <marker date="1458331374351" expanded="true" signature="6044:6164" placeholder="SELECT *, st... customer" />
+            <marker date="1458331374351" expanded="false" signature="6784:6806" placeholder="..." />
+            <marker date="1458331374351" expanded="true" signature="6807:8187" placeholder="..." />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -707,6 +715,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-7.076923">
           <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <folding>
+            <marker date="1458481585625" expanded="true" signature="433:478" placeholder="SELECT * FRO... item" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -721,6 +732,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.8189964">
           <caret line="74" column="60" selection-start-line="74" selection-start-column="60" selection-end-line="74" selection-end-column="60" />
+          <folding>
+            <marker date="1458484665044" expanded="true" signature="676:727" placeholder="SELECT custo... customer" />
+            <marker date="1458484665044" expanded="true" signature="911:977" placeholder="SELECT custo... customer" />
+            <marker date="1458484665044" expanded="true" signature="2159:2870" placeholder="INSERT INTO customer... " />
+            <marker date="1458484665044" expanded="true" signature="3010:3076" placeholder="SELECT custo... customer" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -735,6 +752,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-6.1153846">
           <caret line="28" column="1" selection-start-line="28" selection-start-column="1" selection-end-line="28" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -742,6 +760,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="68.65385">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -749,6 +768,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5125448">
           <caret line="116" column="43" selection-start-line="116" selection-start-column="43" selection-end-line="116" selection-end-column="43" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -782,6 +802,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="1.1577061">
           <caret line="41" column="47" selection-start-line="41" selection-start-column="47" selection-end-line="41" selection-end-column="62" />
+          <folding>
+            <marker date="1458484668454" expanded="true" signature="761:1758" placeholder="update custo... " />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -815,8 +838,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/displayCustomerDetails.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.3498695">
-          <caret line="100" column="0" selection-start-line="100" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.37336814">
+          <caret line="80" column="55" selection-start-line="80" selection-start-column="55" selection-end-line="80" selection-end-column="55" />
           <folding />
         </state>
       </provider>
