@@ -1,0 +1,118 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--include the search JS-->
+        <script src="../js/showSearchOrder.js"></script>
+
+        <!--disable enter key on the form in this page-->
+        <script>
+            $(document).ready(function() {
+                //in each element form, bind this function
+                $("form").bind("keypress", function(e) {
+                    //if the press key is ENTER, disable the event
+                    if (e.keyCode == 13) {
+                        return false;
+                    }
+                });
+            });
+        </script>
+    </head>
+    
+    <body>
+        
+        <div class="container">
+          <!--Page Title-->
+          <h1>Order</h1><br/>
+            
+            
+          <table>
+            <tr>  
+                <!--Create | Edit | Delete Order-->
+                <td>
+                    <a class="btn btn-default" href="newwarehouse.html" data-toggle="tooltip" title="Create New Order"><span class="fa fa-plus" ></span></a>
+                    <button class="btn btn-danger" ><i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Order"></i></button>
+                    <button class="btn btn-primary"><i class="fa fa-file-pdf-o" data-toggle="tooltip" title="Generate Report"></i></button>
+                </td>
+                
+                <!--Input Search Text-->
+                <td><input type="search" name ="search" class="form-control" style="width:auto" placeholder="Search..." id="inputSearchOrder"></td>
+    
+                <!--Search options-->
+                <td>
+                    <select class="form-control" style="width:auto; margin:2px 0px" id="optionSearchOrder">
+                      <span class="input-group-addon"><span class="glyphicon"></span></span>
+                        <option value="1">Order ID</option>
+                        <option value="2">Order Description</option>
+                        <option value="3">Assigned Sales Person</option>
+                    </select>
+                </td>
+                
+                <!--On-click search button-->
+                <td><button type="button" onclick="showSearchOrder()" class="btn btn-primary"><i class="fa fa-search"></i></button></td>
+                
+            </tr>  
+          </table>
+        
+        <br/><br/>
+        
+            <!--display a table to load all the customer by default. in case of searching, load the result of the search-->
+            <div class="container" id="tableResultSearchOrder">
+                <?php
+                    //load all the order by default
+                    //run sql to select all the order
+                    $sql = "SELECT customer_order.order_id, customer_order.order_create_date, customer_order.order_create_time, customer_order.order_status, customer_order.customer_id, customer.customer_name, customer_order.order_total, customer_order.order_reference
+                        FROM customer_order
+                        JOIN customer
+                        ON customer_order.customer_id =customer.customer_id";
+                    
+                    //connect to db via $db and execute the sql
+                    $result = mysqli_query($db, $sql);
+        
+                    //if the number of results is greater than 0, generate a table and load the data to its rows
+                    if (mysqli_num_rows($result) > 0) {
+                    echo "
+                        <!--generate a table-->
+                        <table class=" . "table-striped>" . "
+                            <tr>
+                                <th></th>
+                                <th>Order ID</th>
+                                <th>Creation date</th>
+                                <th>Status</th>
+                                <th>Customer name</th>
+                                <th>Order total value</th>
+                                <th>Order reference ID</th>
+                            </tr>";
+                        // output data of each row
+                        while($row = mysqli_fetch_assoc($result)) {
+                        echo "
+                        <tr>
+                            <td><input type=" . "checkbox></td>
+                            <td>
+                                <a href=" . "edit_order.html?order_id=" . $row['order_id'] .">
+                                " . $row["order_id"]. "
+                                </a>
+                            </td>
+                            <td>" . $row["order_create_date"]. "</td>
+                            <td>" . $row["order_status"]. "</td>
+                            <td>" . $row["customer_name"]. "</td>
+                            <td>" . $row["order_total"]. "</td>
+                            <td>" . $row["order_reference"]. "</td>
+                        </tr>";
+                        }
+                        echo "</table>";
+                    } else {
+                    echo "0 results";
+                    }
+            
+                    mysqli_close($db); // Closing Connection
+                ?>
+            </div>
+        </div>
+        
+    </body>
+</html>

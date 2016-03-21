@@ -1,0 +1,145 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--include the search JS-->
+        <script src="../js/showSearchQuotation.js"></script>
+		<script src="../js/deleteQuotation.js"></script>
+        <!--disable enter key on the form in this page-->
+        <script>
+            $(document).ready(function() {
+                //in each element form, bind this function
+                $("form").bind("keypress", function(e) {
+                    //if the press key is ENTER, disable the event
+                    if (e.keyCode == 13) {
+                        return false;
+                    }
+                });
+            });
+        </script>
+		<script>// Javascript to enable link to tab
+		//ref "Go to Tab on Page Reload" http://www.bootply.com/rg7f7CLlFR
+$('#myTab a').click(function (e) {
+	 e.preventDefault();
+	 $(this).tab('show');
+});
+		var hash = document.location.hash;
+var prefix = "tab_";
+if (hash) {
+    $('.nav-tabs a[href='+hash.replace(prefix,"")+']').tab('show');
+} 
+
+// Change hash for page-reload
+$('.nav-tabs a').on('shown.bs.tab', function (e) {
+    window.location.hash = e.target.hash.replace("#", "#" + prefix);
+});
+</script>
+    </head>
+    
+    <body>
+        <form name="frmQuotation" method="POST" action ="">
+        <div class="container">
+          <!--Page Title-->
+          <h1>Quotation</h1><br/>
+            
+            
+          <table>
+            <tr>  
+                <!--Create | Edit | Delete Quotation-->
+                <td>
+                    <a class="btn btn-default" href="create_quotation.html" data-toggle="tooltip" title="Create New Quotation"><span class="fa fa-plus" ></span></a>
+					
+                    <button class="btn btn-danger" name="deleteQuotation" value="Delete"  onClick="setDeleteQuationAction();" ><i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Order"></i></button>
+					
+                    <button class="btn btn-primary"><i class="fa fa-file-pdf-o" data-toggle="tooltip" title="Generate Report"></i></button>
+                </td>
+                
+                <!--Input Search Text-->
+                <td><input type="search" name ="search" class="form-control" style="width:auto" placeholder="Search..." id="inputSearchQuotation"></td>
+    
+                <!--Search options-->
+                <td>
+                    <select class="form-control" style="width:auto; margin:2px 0px" id="optionSearchQuotation">
+                      <span class="input-group-addon"><span class="glyphicon"></span>
+                        <option value="1">Quotation ID</option>
+                        <option value="2">Customer Name</option>
+                    </select>
+                </td>
+                
+                <!--On-click search button-->
+                <td><button type="button" onclick="showSearchQuotation()" class="btn btn-primary"><i class="fa fa-search"></i></button></td>
+                
+            </tr>  
+          </table>
+        
+        <br/><br/>
+        
+            <!--display a table to load all the Quotation by default. in case of searching, load the result of the search-->
+            <div class="container scrolltable" id="tableResultSearchQuotation">
+                <?php
+                    //load all the quotation by default
+                    //run sql to select all the order
+                    $sql = "SELECT quotation.quotation_id, quotation.quotation_create_date, quotation.quotation_close_date, quotation.quotation_status, quotation.customer_id, customer.customer_name, quotation.quotation_total
+                        FROM quotation
+                        JOIN customer
+                        ON quotation.customer_id =customer.customer_id
+                        WHERE quotation_status <> 'Deleted'";
+                    
+                    //connect to db via $db and execute the sql
+                    $result = mysqli_query($db, $sql);
+        
+                    //if the number of results is greater than 0, generate a table and load the data to its rows
+                    if (mysqli_num_rows($result) > 0) {
+                    echo "
+                        <!--generate a table-->
+                        <table class=" . "table>" . "
+                            <tr>
+                                <th></th>
+                                <th>Quotation ID</th>
+                                <th>Creation date</th>
+                                <th>Closing date</th>
+                                <th>Status</th>
+                                <th>Customer name</th>
+                                <th>Quotation total value</th>
+                            </tr>";
+                        // output data of each row
+                        $i=0;
+                        while ($row = mysqli_fetch_array($result)) {
+						if($i%2==0)
+						$classname="evenRow";
+						else
+						$classname="oddRow";
+						if(isset($classname));
+                        echo "
+                        <tr>
+                            <td><input type=" . "checkbox name='quotation[]' 
+							value =".$row['quotation_id']."></td>
+                            <td>
+                                <a href=" . "edit_quotation.html?quotation_id=" . $row['quotation_id'] .">
+                                " . $row["quotation_id"]. "
+                                </a>
+                            </td>
+                            <td>" . $row["quotation_create_date"]. "</td>
+                            <td>" . $row["quotation_close_date"]. "</td>
+                            <td>" . $row["quotation_status"]. "</td>
+                            <td>" . $row["customer_name"]. "</td>
+                            <td>" . $row["quotation_total"]. "</td>
+                        </tr>";
+						$i++;
+                        }
+                        echo "</table>";
+                    } else {
+                    echo "0 results";
+                    }
+            
+                    mysqli_close($db); // Closing Connection
+                ?>
+            </div>
+        </div>
+        
+    </body>
+</html>

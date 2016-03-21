@@ -2,6 +2,39 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="88b91c88-eb91-4ed8-a1ed-aa546f9736c1" name="Default" comment="sprint 4 complete">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/images/logo.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/create_order.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/create_quotation.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/edit_order_test.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/edit_quotation.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/quotation.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/versions/customer.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/versions/edit_order_21_03.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/html/versions/order.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/customerTable.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/deleteCustomer.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/deleteOrder.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/deleteQuotation.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/displayCustomerDetails.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/gen_validatorv4.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/js/versions/displayCustomerDetails_21_03.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/create_order.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/create_quotation.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/delete_customer.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/delete_order.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/delete_quotation.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/edit_order.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/exportExcel.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/courier.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/courierb.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/courierbi.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/courieri.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/helvetica.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/helveticab.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/helveticabi.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/font/helveticai.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/php/pdf/fpdf.php" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/sql_db/breath_20160318.sql" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="BREATH.iws" />
@@ -354,7 +387,13 @@
       <option name="project" value="LOCAL" />
       <updated>1458540758518</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="sprint 4 complete">
+      <created>1458540878240</created>
+      <option name="number" value="00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1458540878240</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">

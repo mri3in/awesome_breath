@@ -1,0 +1,282 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
+  <script src="../js/jquery-2.1.4.min.js"></script>
+  <script src="../js/bootstrap.min.js"></script>
+  <script src="../js/script.js"></script>
+  <script src="../lib/angular/angular.min.js"></script>
+  <script src="../js/gen_validatorv4.js"></script>
+  <script src="../js/moment.js"></script>
+    <script src="../js/displayCustomerDetails.js"></script>
+
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+
+    <div class="row">
+        <form role="form" name="myForm" action="" method="post">
+            <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
+
+                    <h2 class="text-center">Quotation</h2>
+                <!-- define the note for * symbol-->
+                <div class="well well-sm col-md-4 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                <!-- display the Quotation ID -->
+                <div class="well well-sm col-md-4 text-center pull-right"><strong>Quotation ID: </strong></div>
+                <!--clear floating display style so that all input can display vertically-->
+                <div class="clearfix"></div>
+                <div class="form-group">
+
+                    <label>Customer Name</label>
+                    <div class="input-group">
+                         <select id="customer_id_select" name="customer_id" class="form-control" onchange="displayCustomerDetails(document.getElementById('customer_id_select').value)">
+                            <option value="0" selected disabled>--Please Select Customer Name--</option>
+                            <?php
+                             //get the desired customer by customer_id in URL
+
+                            //set up the sql to select the record that has the corresponding customer_id
+                            $sql_customer_select = "SELECT customer.customer_name,customer.customer_id FROM customer";
+
+                            //run the query to get the customer
+                            $query_customer_select = mysqli_query($db,$sql_customer_select);
+
+                            //fetch the result to an array
+                            while($row_customer_select = mysqli_fetch_assoc($query_customer_select)) {
+
+                            echo "<option id ='myselect'value=".$row_customer_select["customer_id"].">".$row_customer_select["customer_name"]."</option>";
+
+                             }
+                            ?>
+                          </select>
+                        <!--run the script to load corresponding customer details based on the change of customer name-->
+                        <!--<script>
+                            $("#customer_id_select").change( function(){
+                                alert(document.getElementById("customer_id_select").value);
+                            displayCustomerDetails(document.getElementById("customer_id_select").value);})
+                        </script>-->
+
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--Display customer information as user select from select input above-->
+                <!--Display customer information as user select from select input above-->
+                <div class="form-group" id="customer_detail_display">
+                    <p hidden>[Customer Description]</p>
+                </div>
+
+                <div class="form-group ">
+                        <label>Quotation Status</label>
+                        <div class="input-group">
+                             <select name="quotation_status" class="form-control">
+                                <option selected disabled>--Please Select quotation Statis--</option>
+                                <option>Processed</option>
+                                <option>Shipped</option>
+                                <option>Delivered</option>
+                              </select>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+
+                <!--Dynamic Form Processing with PHP-->
+                <div class="form-group">
+                    <legend>quotation Line</legend>
+    					<input type="button" value="Add New quotation Line" onClick="addRow('dataTable')" />
+    					<input type="button" value="Remove Checked quotation Line" onClick="deleteRow('dataTable')"  /> 
+    					<p>(All acions apply only to entries with check marked check boxes only.)</p>
+                        <div id="myForm_errorloc" class="error"></div>
+                   <table id="dataTable" class="table">
+                       <tr>
+                           <th></th>
+                           <th>
+                               <label>Item ID</label>
+                           </th>
+                           <th>
+                               <label>Item Name</label>
+                           </th>
+                           <th>
+                               <label>Quantity</label>
+                           </th>
+                           <th>
+                               <label>Vendor</label>
+                           </th>
+                           <th>
+                               <label>Delivery Date</label>
+                           </th>
+                           <!--<th>
+                               <label>Suggest Price</label>
+                           </th>-->
+                           <th>
+                               <label>Selling price</label>
+                           </th>
+                           <th>
+                               <label>Net selling price</label>
+                           </th>
+                           <th>
+                               <label>Tax</label>
+                           </th>
+                       </tr>
+                        <tr>
+    						<td><input type="checkbox"  name="chk[]"/></td>
+    						  <td>
+    							<select id="item_id" name="item_id[]" style="width:200px" >
+    								<option>....</option>
+    								<?php
+                             //get the desired customer by customer_id in URL
+
+                            //set up the sql to select the record that has the corresponding customer_id
+                            $sql_customer_select = "SELECT item.item_name,item.item_id FROM item";
+
+                            //run the query to get the customer
+                            $query_customer_select = mysqli_query($db,$sql_customer_select);
+
+                            //fetch the result to an array
+                            while($row_customer_select = mysqli_fetch_assoc($query_customer_select)) {
+
+                            echo "<option id ='myselect'value=".$row_customer_select["item_id"].">".$row_customer_select["item_name"]."</option>";
+
+                                    }
+                                    ?>
+    							</select>
+    						 </td>
+                            <td>
+                                <input type="text" style="width:90%"  name="item_name[]">
+                            </td>
+                            <td>
+    							<input type="text" style="width:90%"  name="quotation_line_item_quantity[]" min="0">
+    					    </td>
+                            <td>
+                                <input type="text" style="width:90%"  name="item_vendor[]" >
+                            </td>
+                            <td>
+                                <input type="date" style="width:90%" name="quotation_line_delivery_date[]">
+                            </td>
+                            <!--<td>
+                                <input type="text" style="width:90%"  name="item_unit_price[]" disabled>
+                            </td>-->
+                            <td>
+    							<input type="text" style="width:90%" name="quotation_line_selling_price[]" min="0">
+    						</td>
+                            <td>
+                                <input type="text" style="width:90%" name="quotation_line_net_selling_price[]" min="0">
+                            </td>
+                            <td>
+                                <input type="text" style="width:90%" name="item_VAT[]" >
+                            </td>
+                        </tr>
+                    </table>
+    				<div class="clear"></div>
+                    <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
+                </div>
+                <div class="form-group">
+                      <label>Note</label>
+                      <div class="input-group">
+                          <textarea name="customer_note" class="form-control" rows="2"></textarea>
+                          <span class="input-group-addon"><span class="glyphicon"></span></span>
+                      </div>
+                </div>
+                <div class="form-group pull-right">
+                    <table>
+                        <tr>
+                            <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
+                            <td><b>Price</b></td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><label>Tax:</label></td>
+                            <td><b>Tax</b></td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><label>Total Price (Tax incl):</label></td>
+                            <td><b>Price</b></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+                <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
+                    <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
+                </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="footer"></div>
+
+<!--script to validate inputs
+Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+<script language="JavaScript" type="text/javascript">
+    //You should create the validator only after the definition of the HTML form
+
+    var frmvalidator  = new Validator("myForm");
+    frmvalidator.EnableOnPageErrorDisplaySingleBox();
+    frmvalidator.EnableMsgsTogether();
+
+    frmvalidator.addValidation("quotation_line_item_quantity[]","req","Please select quantity");
+    frmvalidator.addValidation("quotation_line_delivery_date[]","req","Please select date of delivery");
+    frmvalidator.addValidation("quotation_line_selling_price[]","req","Please select selling price");
+    frmvalidator.addValidation("item_VAT[]","req","Please enter Tax Percentage");
+
+    /**
+     * Projet Name : Dynamic Form Processing with PHP
+     * URL: http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP
+     *
+     * Licensed under the MIT license.
+     * http://www.opensource.org/licenses/mit-license.php
+     *
+     * Copyright 2013, Tech Stream
+     * http://techstream.org
+     */
+
+    function addRow(tableID) {
+        var table = document.getElementById(tableID);
+        var rowCount = table.rows.length;
+        if(rowCount < 10){							// limit the user from creating fields more than your limits
+            var row = table.insertRow(rowCount);
+            var colCount = table.rows[0].cells.length;
+            for(var i=0; i<colCount; i++) {
+                var newcell = row.insertCell(i);
+                newcell.innerHTML = table.rows[1].cells[i].innerHTML;
+            }
+        }else{
+            alert("Maximum Passenger per ticket is 5.");
+
+        }
+    }
+
+    function deleteRow(tableID) {
+        var table = document.getElementById(tableID);
+        var rowCount = table.rows.length;
+        for(var i=0; i<rowCount; i++) {
+            var row = table.rows[i];
+            var chkbox = row.cells[0].childNodes[0];
+            if(null != chkbox && true == chkbox.checked) {
+                if(rowCount <= 1) { 						// limit the user from removing all the fields
+                    alert("Cannot Remove all the Passenger.");
+                    break;
+                }
+                table.deleteRow(i);
+                rowCount--;
+                i--;
+            }
+        }
+    }
+
+    function myFunction() {
+        document.getElementsByTagName("H1")[0].setAttribute("class", "democlass");
+    }
+
+</script>
+</body>
+</html>
