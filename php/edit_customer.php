@@ -7,7 +7,7 @@
  */
 
     //Connect to database via $db
-    include '../config.php';
+    include ('../config.php');
 
     //get the street + city and concatenate them to make the shipping & billing address
     $customer_shipping_address = $_POST["customer_shipping_address_street"].";".$_POST["customer_shipping_address_city"].";".$_POST["customer_shipping_address_country"];
@@ -27,6 +27,7 @@
                   customer_credit_limit = '$_POST[customer_credit_limit]', 
                   customer_payment_term = '$_POST[customer_payment_term]', 
                   staff_id = '$_POST[staff_id]',
+                  customer_phone_number = '$_POST[customer_phone_number]',
                   customer_contact_person_name = '$_POST[customer_contact_person_name]', 
                   customer_contact_person_phone_number = '$_POST[customer_contact_person_phone_number]', 
                   customer_contact_person_email = '$_POST[customer_contact_person_email]',
@@ -38,6 +39,7 @@
 
     //if success, echo the success message
     echo "successfully edit customer name = " . $_POST['customer_name'];
+
     // redirect to customer tab
-    header("Location:../html/sale.html#customer?editCustomer=1");
+    header("Location:../html/sale.html#customer");
 ?>

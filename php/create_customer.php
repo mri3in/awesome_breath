@@ -7,7 +7,7 @@
  */
 
     //Connect to database via $db
-    include '../config.php';
+    include ('../config.php');
 
     //get the street + city and concatenate them to make the shipping & billing address
     $customer_shipping_address = $_POST["customer_shipping_address_street"].";".$_POST["customer_shipping_address_city"].";".$_POST["customer_shipping_address_country"];
@@ -44,7 +44,7 @@
         $customer_id = $row_last_record_id["customer_id"] + 1;
 
         //Create new customer with info from the URL POST method
-        mysqli_query($db, "INSERT INTO customer (customer_id, customer_name, customer_long_name, customer_billing_address, customer_shipping_address, customer_tax_code, customer_credit_limit, customer_payment_term, staff_id, customer_contact_person_name, customer_contact_person_phone_number, customer_contact_person_email, customer_status) VALUES ('$customer_id','$_POST[customer_name]','$_POST[customer_long_name]','$customer_billing_address','$customer_shipping_address','$_POST[customer_tax_code]','$_POST[customer_credit_limit]','$_POST[customer_payment_term]','$_POST[staff_id]',
+        mysqli_query($db, "INSERT INTO customer (customer_id, customer_name, customer_long_name, customer_billing_address, customer_shipping_address, customer_tax_code, customer_credit_limit, customer_payment_term, customer_phone_number, staff_id, customer_contact_person_name,  customer_contact_person_phone_number, customer_contact_person_email, customer_status) VALUES ('$customer_id','$_POST[customer_name]','$_POST[customer_long_name]','$customer_billing_address','$customer_shipping_address','$_POST[customer_tax_code]','$_POST[customer_credit_limit]','$_POST[customer_payment_term]','$_POST[customer_phone_number]', '$_POST[staff_id]',
 '$_POST[customer_contact_person_name]','$_POST[customer_contact_person_phone_number]','$_POST[customer_contact_person_email]','$_POST[customer_status]')");
 
         //Check if the creation is successful
@@ -72,5 +72,6 @@
     {
         echo "<script type='text/javascript'> alert (\"Failed to add customer\")</script>";
     }
-header("Location:../html/sale.html#customer?createCustomer=1");
+    // redirect to customer tab
+    header("Location:../html/sale.html#customer");
 ?>

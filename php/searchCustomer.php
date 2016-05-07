@@ -1,158 +1,85 @@
-<!DOCTYPE html>
-<html>
-<head>
-<!--    include JS file to show the result of search customer-->
-    <script src="../js/showSearchCustomer.js"></script>
-</head>
-<body>
-    <div class="container">
+<?php
+    // declare the json array
+    $jsonCustomer = array();
 
-        <?php
-            //include the config file to connect to db using $db
-            include('../config.php');
+    //get the params on URL after the search
+    $customer_id = $_GET['search'];
 
-            //set out put to empty
-            $output = '';
+    // create sql query
+    $result_customer =  mysqli_query($db, "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_id = '$customer_id'");
 
-            //check if any params are passed by GET method in the URL
-            if (isset($_GET['search']))
-                {
-                    if (isset($_GET['option']))
-                    {
-                        //get the params on URL after the search
-                        $searchq = $_GET['search'];
-                        $optionq = $_GET['option'];
-                        //	$searchq = preg_replace("#[0-9]#i","",$searchq);
+    // store errors
+    if (mysqli_connect_errno()) {
+        $customer_array = array(
+            'error' => mysqli_connect_error(),
+            'result' => "error"
+        );
+        array_push($jsonCustomer, $customer_array);
+    }
+    else if (!$result_customer){
+        $customer_array = array(
+            'error' => mysqli_error($db),
+            'result' => "error"
+        );
+        array_push($jsonCustomer, $customer_array);
+    }
+    else {
+        // fetch the customer data to array
+        while ($row_customer = mysqli_fetch_array($result_customer)) {
+            //split the string billing address based on semi-colon
+            $customer_billing_address = $row_customer['customer_billing_address'];
 
-                        //based on the option, run a query to get the desired customer details
-                        switch ($optionq) {
-                            case "1": //customer name
-                                $query = mysqli_query($db, "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_name LIKE '%$searchq%'") or die ("could not search");
-                                break;
-                            case "2": //address
-                                $query = mysqli_query($db, "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id  FROM customer WHERE customer_billing_address LIKE '%$searchq%' ") or die ("could not search");
-                                break;
-                            case "3": //contact person name
-                                $query = mysqli_query($db, "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id  FROM customer WHERE customer_contact_person_name LIKE '%$searchq%' ") or die ("could not search");
-                                break;
-                        }
-                        //count the result
-                        $count = mysqli_num_rows($query);
+            //declare 3 variables as blank to prevent no data from the string
+            $customer_billing_address_street = "";
+            $customer_billing_address_city = "";
+            $customer_billing_address_country = "";
 
-                        //if any results are found, display them to the table
-                        if ($count >0) {
+            //split the string and assign to the variables
+            if ($customer_billing_address != ""){
+                list($customer_billing_address_street, $customer_billing_address_city, $customer_billing_address_country) = explode(";", $customer_billing_address);
+            }
 
-                            //display the number of results
-                            echo "<b> Found " . $count . " result(s)! </b>";
+            //split the string shipping address based on semi-colon
+            $customer_shipping_address = $row_customer['customer_shipping_address'];
 
-                            //generate a table with proper header
-                            echo
-                                "<table class=" . "table-striped>" . "
-                        <tr>
-                             <th></th>
-                             <!--
-                             <th>Customer ID</th>
-                             <th>Customer Name</th>
-                             -->
-                             <th>Customer Long Name</th>
-                             <th>Customer Billing Address</th>
-                             <th>Customer Shipping Address</th>
-                             <th>Customer Tax Code</th>
-                             <th>Customer Credit Limit</th>
-                             <th>Customer Payment Term</th>
-                             <th>Responsible Staff Name</th>
-                             <th>Customer Contact Person Name</th>
-                             <th>Customer Contact Person Phone Number</th>
-                             <th>Customer Contact Person Email</th>
-                             <th>Customer Status</th>
+            //declare 3 variables as blank to prevent no data from the string
+            $customer_shipping_address_street = "";
+            $customer_shipping_address_city = "";
+            $customer_shipping_address_country = "";
 
-                        </tr>";
+            //split the string and assign to the variables
+            if ($customer_shipping_address != ""){
+                list($customer_shipping_address_street, $customer_shipping_address_city, $customer_shipping_address_country) = explode(";", $customer_shipping_address);
+            }
 
-                            //fetch the results to table rows, the customer_name should have the link to the edit page
-                            while ($row = mysqli_fetch_array($query)) {
-                                echo
-                                    "<tr id=" . "link>" . "
-                                 <td><input type=" . "checkbox></td>
-                                 <!--
-                                 <td>
-                                    <a href=" . "edit_customer.html?customer_id=" . $row["customer_id"] .">
-                                        " . $row["customer_id"]. "
-                                    </a>
-                                 </td>
-                                 -->
-                                 <td>
-                                    <a href=" . "edit_customer.html?customer_id=" . $row["customer_id"] .">
-                                        " . $row["customer_name"]. "
-                                    </a>
-                                 </td>
-                                 <td>" . $row["customer_billing_address"]. "</td>
-                                 <td>" . $row["customer_shipping_address"]. "</td>
-                                 <td>" . $row["customer_tax_code"]. "</td>
-                                 <td>" . $row["customer_credit_limit"]. "</td>
-                                 <td>" . $row["customer_payment_term"]. "</td>
-                                 <td>" . $row["staff_name"]. "</td>
-                                 <td>" . $row["customer_contact_person_name"]. "</td>
-                                 <td>" . $row["customer_contact_person_phone_number"]. "</td>
-                                 <td>" . $row["customer_contact_person_email"]. "</td>
-                                 <td>" . $row["customer_status"]. "</td>
-                             </tr>";
-                            }
+            $customer_array = array(
+                'customerName' => $row_customer['customer_name'],
+                'customerLongName' => $row_customer['customer_long_name'],
 
-                            //close the table
-                            echo "</table>";
-
-                            //if the number of results is 0, display not found text
-                        } else echo "<b> Result not found </b>";
-
-                    }
-                    else
-                    {
-                        //get the params on URL after the search
-                        $searchq = $_GET['search'];
-                        //$optionq = $_GET['option'];
-                        //	$searchq = preg_replace("#[0-9]#i","",$searchq);
-
-
-                        //run a query to get the desired customer details
-                        $query = mysqli_query($db, "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_id = '$searchq'") or die ("could not search");
-                        //count the result
-                        $count = mysqli_num_rows($query);
-//echo $searchq;
-                        //if any results are found, display them to the table
-                        if ($count >0) {
-                            //fetch the results to table rows, the customer_name should have the link to the edit page
-                            while ($row = mysqli_fetch_array($query)) {
-                            //generate a table with proper header
-                            echo
-                                "<table class='table' style='width: 75% !important;'>" . "
-                             <!--<th>Customer ID</th>-->
-                             <tr><th>Customer Name: </th><td>". $row["customer_name"] . "</td></tr>
-                             <tr><th>Customer Long Name: </th><td>". $row["customer_long_name"] . "</td></tr>
-                             <tr><th>Customer Billing Address: </th><td>" . $row["customer_billing_address"]. "</td></tr>
-                             <tr><th>Customer Shipping Address: </th><td>" . $row["customer_shipping_address"]. "</td></tr>
-                             <tr><th>Customer Tax Code: </th><td>" . $row["customer_tax_code"]. "</td></tr>" .
-                             //<tr><th>Customer Credit Limit: </th><td>" . $row["customer_credit_limit"]. "</td></tr>
-                             //<tr><th>Customer Payment Term: </th><td>" . $row["customer_payment_term"]. "</td></tr>
-                             "<tr><th>Responsible Staff Name: </th><td>" . $row["staff_name"]. "</td></tr>
-                             <tr><th>Customer Contact Person Name: </th><td>" . $row["customer_contact_person_name"]. "</td></tr>
-                             <tr><th>Customer Contact Person Phone Number: </th><td>" . $row["customer_contact_person_phone_number"]. "</td></tr>
-                             <tr><th>Customer Contact Person Email: </th><td>" . $row["customer_contact_person_email"]. "</td></tr>"
-                             //<tr><th>Customer Status: </th><td>" . $row["customer_status"]
-                            ;
-                            }
-
-                            //close the table
-                            echo "</table>";
-
-                            //if the number of results is 0, display not found text
-                        } else echo "<b> Result not found </b>";
-                    }
-                }
-                else //if no param is passed, display error text
-                    echo "<b> Cannot search. Please try again later </b>";
-        ?>
-
-    </div>
-
-</body>
-</html>
+                'customerTaxCode' => $row_customer['customer_tax_code'],
+                'customerPhoneNumber' => $row_customer['customer_phone_number'],
+                'customerStatus' => $row_customer['customer_status'],
+                'customerSalespersonAccountableID' => $row_customer['staff_id'],
+                'customerSalespersonAccountableName' => $row_customer['staff_name'],
+                'customerBillingAddress' => $row_customer['customer_billing_address'],
+                'customerBillingAddressStreet' => $customer_billing_address_street,
+                'customerBillingAddressCountry' => $customer_billing_address_country,
+                'customerBillingAddressCity' => $customer_billing_address_city,
+                'customerShippingAddress' => $row_customer['customer_shipping_address'],
+                'customerShippingAddressStreet' => $customer_shipping_address_street,
+                'customerShippingAddressCountry' => $customer_shipping_address_country,
+                'customerShippingAddressCity' => $customer_shipping_address_city,
+                'customerCreditLimit' => $row_customer['customer_credit_limit'],
+                'customerCurrentCredit' => $row_customer['customer_current_credit'],
+                'customerPaymentTerm' => $row_customer['customer_payment_term'],
+                'error' => "",
+                'result' => "success"
+            );
+            // push to array
+            array_push($jsonCustomer, $customer_array);
+        }
+        // json encode the array
+        $jsonStringCustomer = json_encode($jsonCustomer);
+        echo $jsonStringCustomer;
+    }
+?>

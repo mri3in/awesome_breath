@@ -1,118 +1,74 @@
-<!DOCTYPE html>
-<html>
-<head>
-<!--    include JS file to show the result of search customer-->
-    <script src="/js/showSearchOrder.js"></script>
-</head>
-<body>
-    <div class="container">
+<?php
 
-        <?php
-            //include the config file to connect to db using $db
-            include('/config.php');
+    $jsonOrder = array();
+    $order_line_id_list = "";
+    $item_id_list = "";
+    $item_name_list = "";
 
-            //set out put to empty
-            $output = '';
+    //get the params on URL after the search
+    $order_id = $_GET['search'];
 
-            //check if any params are passed by GET method in the URL
-            if (isset($_GET['search']) && isset($_GET['option']))
-            {
-                //get the params on URL after the search
-                $searchq = $_GET['search'];
-                $optionq = $_GET['option'];
-                //	$searchq = preg_replace("#[0-9]#i","",$searchq);
+    // create sql query
+    $result_order =  mysqli_query($db, "SELECT *, customer.customer_long_name, customer.customer_billing_address FROM customer_order JOIN customer ON customer_order.customer_id = customer.customer_id WHERE order_id = '$order_id'");
 
-                //based on the option, run a query to get the desired customer details
-                switch ($optionq) {
-                    case "1": //order id
-                        $query = mysqli_query($db, "SELECT * FROM customer_order WHERE order_id LIKE '%$searchq%'") or die ("could not search");
-                        break;
-                    case "2": //address
-                        $query = mysqli_query($db, "SELECT * FROM customer WHERE customer_billing_address LIKE '%$searchq%' ") or die ("could not search");
-                        break;
-                    case "3": //contact person name
-                        $query = mysqli_query($db, "SELECT * FROM customer WHERE customer_contact_person_name LIKE '%$searchq%' ") or die ("could not search");
-                        break;
-                }
-                //count the result
-                $count = mysqli_num_rows($query);
+    $result_order_line = mysqli_query($db, "SELECT *, item.item_name FROM order_line JOIN customer_order ON customer_order.order_id = order_line.order_id JOIN item ON order_line.order_line_item_id = item.item_id WHERE order_line.order_id = '$order_id' AND order_line.order_line_deliver_status <> 'Shipped' AND order_line.order_line_deliver_status <> 'Delivered' ORDER BY order_line.order_line_id ASC ");
 
-                //if any results are found, display them to the table
-                if ($count >0) {
-
-                    //display the number of results
-                    echo "<b> Found " . $count . " result(s)! </b>";
-
-                    //generate a table with proper header
-                    echo
-                        "<table class=" . "table-striped>" . "
-                        <tr>
-                             <th></th>
-                             <!--
-                             <th>Customer ID</th>
-                             -->
-                             <th>Customer Name</th>
-                             <th>Customer Billing Address</th>
-                             <th>Customer Shipping Address</th>
-                             <th>Customer Tax Code</th>
-                             <th>Customer Credit Limit</th>
-                             <th>Customer Payment</th>
-                             <th>Customer Payment Term</th>
-                             <th>Responsible Staff</th>
-                             <th>Customer Contact Person Name</th>
-                             <th>Customer Contact Person Phone Number</th>
-                             <th>Customer Contact Person Email</th>
-                             <th>Customer Description</th>
-
-                        </tr>";
-
-                    //fetch the results to table rows, the customer_name should have the link to the edit page
-                    while ($row = mysqli_fetch_array($query)) {
-                        echo
-                             "<tr id=" . "link>" . "
-                                 <td><input type=" . "checkbox></td>
-                                 <!--
-                                 <td>
-                                    <a href=" . "edit_customer.html?customer_id=" . $row["customer_id"] .">
-                                        " . $row["customer_id"]. "
-                                    </a>
-                                 </td>
-                                 -->
-                                 <td>
-                                    <a href=" . "edit_customer.html?customer_id=" . $row["customer_id"] .">
-                                        " . $row["customer_name"]. "
-                                    </a>
-                                 </td>
-                                 <td>" . $row["customer_billing_address"]. "</td>
-                                 <td>" . $row["customer_shipping_address"]. "</td>
-                                 <td>" . $row["customer_tax_code"]. "</td>
-                                 <td>" . $row["customer_credit_limit"]. "</td>
-                                 <td>" . $row["customer_payment"]. "</td>
-                                 <td>" . $row["customer_payment_term"]. "</td>
-                                 <td>" . $row["staff_id"]. "</td>
-                                 <td>" . $row["customer_contact_person_name"]. "</td>
-                                 <td>" . $row["customer_contact_person_phone_number"]. "</td>
-                                 <td>" . $row["customer_contact_person_email"]. "</td>
-                                 <td>" . $row["customer_description"]. "</td>
-                             </tr>";
-                    }
-
-                    //close the table
-                    echo "</table>";
-
-                //if the number of results is 0, display not found text
-                } else echo "<b> Result not found </b>";
-
+    // store errors
+    if (mysqli_connect_errno()) {
+        $order_array = array(
+            'error' => mysqli_connect_error(),
+            'result' => "error"
+        );
+        array_push($jsonOrder, $order_array);
+    }
+    else if (!$result_order || !$result_order_line){
+        $order_array = array(
+            'error' => mysqli_error($db),
+            'result' => "error"
+        );
+        array_push($jsonOrder, $order_array);
+    }
+    else {
+        // fetch order line id to array
+        while ($row_order_line = mysqli_fetch_assoc($result_order_line)){
+            if (empty($order_line_id_list)){
+                $order_line_id_list = (string)$row_order_line['order_line_id'];
             }
-            else //if no param is passed, display error text
-            {
-                echo "<b> Cannot search. Please try again later </b>";
+            else {
+                $order_line_id_list = $order_line_id_list . "|" . (string)$row_order_line['order_line_id'];
             }
-        ?>
+            if (empty($item_id_list)){
+                $item_id_list = (string)$row_order_line['item_id'];
+            }
+            else {
+                $item_id_list = $item_id_list . "|" . (string)$row_order_line['item_id'];
+            }
+            if (empty($item_name_list)){
+                $item_name_list = (string)$row_order_line['item_name'];
+            }
+            else {
+                $item_name_list = $item_name_list . "|" . (string)$row_order_line['item_name'];
+            }
+        }
 
-    </div>
+        // fetch the order data to array
+        while ($row_order = mysqli_fetch_array($result_order)) {
 
-</body>
-</html>
+            $order_array = array(
+                'orderID' => $row_order['order_id'],
+                'customerLongName' => $row_order['customer_long_name'],
+                'customerBillingAddress' => $row_order['customer_billing_address'],
+                'orderShippingAddress' => $row_order['order_shipping_address'],
+                'orderLineID' => $order_line_id_list,
+                'itemLineID' => $item_id_list,
+                'itemLineName' => $item_name_list,
+                'error' => "",
+                'result' => "success"
+            );
+            array_push($jsonOrder, $order_array);
+        }
 
-
+        $jsonStringOrder = json_encode($jsonOrder);
+        echo $jsonStringOrder;
+    }
+?>
