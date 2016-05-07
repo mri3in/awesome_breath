@@ -16,9 +16,8 @@ header("location: php/profile.php");
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/jquery-2.1.4.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
-  <script src="js/script.js"></script>
-  <script src="lib/angular/angular. min.js"></script>
-  <script src="js/controllers.js"></script>
+  <script src="js/partialsScript.js"></script>
+<!--  <link rel="icon" type="image/png" href="./images/favicon.png">-->
   <title>BREATH v1.0</title>
 </head>
 <body>
@@ -47,7 +46,7 @@ header("location: php/profile.php");
         </div>
         <a href="">Forgot Your Password? </a>
         <div >
-          <input class="pull-right" name="submit" type="submit" value=" Login ">
+          <input class="btn btn-default pull-right" name="submit" type="submit" value=" Login ">
         </div>
         
         <span style="color:red;"><?php echo $error; ?></span>

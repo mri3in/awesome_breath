@@ -14,4 +14,7 @@
 	if (!$db) {
     die("Connection failed: " . mysqli_connect_error());
 	}
+
+    define('DOMAIN_NAME', 'http://breath.dev');
+    define('IMG_LOCATION', DOMAIN_NAME.'/images/')
 ?>
