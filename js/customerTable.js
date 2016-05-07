@@ -35,8 +35,8 @@ for (i = 1; i < rows.length; i++) {cells = rows[i].getElementsByTagName('td');
         rows[i].className = "";
 
     if (cells[7].innerHTML == 'Suspended')
-        rows[i].className = "warning";
+        rows[i].className = "danger";
 
-    if (cells[7].innerHTML == 'Deleted')
-        rows[i].className = "danger ";
+    /*if (cells[7].innerHTML == 'Deleted')
+        rows[i].className = "danger ";*/
 }
