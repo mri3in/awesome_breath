@@ -1,0 +1,98 @@
+<?php
+//include the definition of database
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+	<script src="../js/jquery.multi-select.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/countries.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/customScript.js"></script>
+    
+</head>
+<body>
+
+    <div id="header"></div>
+
+    <div class="container">
+         <!--establish the form for customer, the form will perform validation, after that, search function -->
+        <form role="form" name="myForm" id="myForm" action="../php/create_user.php" method="post">
+
+            <!--define the title of the form + the note for * symbol-->
+            <h2 class="text-center">Authority</h2>
+            <div class="well well-sm col-sm-2 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+            <div class="clearfix"></div>
+
+            <!--draw a outside border + display form legend-->
+            <fieldset>
+                <legend>Basic Information</legend>
+
+                <!--display role-->
+                <div class="form-group col-sm-3 pull-left">
+                    <label>Role</label>
+                    <!--display the error line of code-->
+                    <div id="myForm_role_id_errorloc" class="error"></div>
+                    <div class="form-group">
+                        <select id="role_id" name="role_id" class="form-control">
+                                <option value="0" selected disabled>--Please select role--</option>
+                                <option value="1">CEO</option>
+                                <option value="2">Sales</option>
+                                <option value="3">Accounting</option>
+                                <option value="4">Warehouse</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!--display access pages-->
+                <div class="form-group col-sm-6">
+                    <label>Access Pages</label>
+                <!--display the error line of code-->
+                    <div id="myForm_page_errorloc" class="error"></div>
+                    <div class="form-group">
+                        <select id="page" name="page" class="form-control" multiple="multiple">
+                            <!--Display all the html file in the html folder -->
+                            <?php
+                                $dir = "../html";
+                                $dh  = opendir($dir);
+                                while (false != ($filename = readdir($dh))) {
+                                $files[] = $filename;
+                            ?>
+                                <option value="<?php echo $filename;?>"><?php echo $filename;?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <!--submit button-->
+                <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default pull-right">
+            </fieldset>
+        </form>
+    </div>
+    <div id="footer"></div>
+
+    <script>
+        //for multi-select
+        $('#page').multiSelect({
+            afterSelect: function(values){
+            },
+            afterDeselect: function(values){
+
+            }
+        });
+    </script>
+</body>
+</html>

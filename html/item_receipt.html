@@ -1,0 +1,286 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+
+    //declare timezone and current date, time
+    date_default_timezone_set("Asia/Ho_Chi_Minh");
+
+    // set the current date
+    $current_date = date("Y-m-d");
+
+    //set up the sql to select the record that has the corresponding warehouse_id
+    $sql_warehouse = "SELECT * FROM warehouse";
+
+    //run the query to get the warehouse
+    $query_warehouse = mysqli_query($db,$sql_warehouse) or die ("Error: Cannot edit warehouse");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/customScript.js"></script>
+    <style>
+        .border-less td, .border-less th {
+            border: none !important;
+        }
+        .no-warp label{
+            white-space: nowrap;
+        }
+    </style>
+    <title>Item Receipt</title>
+</head>
+<body>
+<!--display header + navigation bar-->
+<div id="header"></div>
+
+<!--start container -->
+<div class="container">
+    <form role="form" name="myForm" action="../php/item_receipt.php" method="post">
+
+        <!--define the title of the form + the note for * symbol-->
+        <h2 class="text-center">Good Receipt Register - <?php echo date('Y / m / d', strtotime((string)$current_date));?></h2>
+        <div class="well well-sm col-sm-2 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+        <!--store the creation date of transaction-->
+        <input hidden name="transaction_date" value="<?php echo $current_date;?>">
+        <div class="clearfix"></div>
+
+        <!--display general detail fields-->
+        <div class="form-group">
+                <!--draw a outside border + display form legend-->
+            <fieldset>
+                <legend>Basic Information</legend>
+                <!--display the fields-->
+                <!--start of supplier receipt bill number-->
+                <div class="form-group col-sm-4 pull-left">
+                    <label>Supplier Receipt Bill Number</label>
+                    <!--display the error line of code-->
+                    <div id="myForm_warehouse_supplier_receive_bill_number_errorloc" class="error"></div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="warehouse_supplier_receive_bill_number" placeholder="Supplier Receipt Bill Number"  >
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--end of supplier receipt bill number-->
+
+                <!--start of currency name-->
+                <div class="form-group col-sm-4">
+                    <label>Currency</label>
+                    <!--display the error line of code-->
+                    <div id="myForm_exchange_rate_name_errorloc" class="error"></div>
+                    <div class="input-group">
+                        <!--Display the exchange rate for select-->
+                        <select  id="exchange_rate"  name="exchange_rate" class="form-control" onchange="displayCurrencyRate()">
+                            <option value="1">VND</option>
+                            <?php
+                                $url = "http://www.vietcombank.com.vn/exchangerates/ExrateXML.aspx";
+                                $read_xml = simplexml_load_file($url);
+                                for ($i=0;$i<count($read_xml->Exrate,1);$i++) {
+                                echo "<option value=".$read_xml->Exrate[$i]['Sell'].">".$read_xml->Exrate[$i]['CurrencyName']."</option>";
+                                }
+                            ?>
+                        </select>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--end of currency name-->
+
+                <!--start of Exchange Rate-->
+                <div class="form-group col-sm-4 pull-right">
+                    <label>Currency Exchange Rate</label>
+                    <!--display the error line of code-->
+                    <div id="myForm_exchange_rate_value_errorloc" class="error"></div>
+                    <div class="input-group">
+                        <input id="exchange_rate_display" type="text" class="form-control" name="exchange_rate_display" placeholder="Currency Rate" readonly>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--end of Exchange Rate-->
+
+                <div class="clearfix"></div>
+
+                <!--start of warehouse selection-->
+                <div class="form-group col-sm-4">
+                    <label>Warehouse</label>
+                    <!--display the error line of code-->
+                    <div id="myForm_warehouse_id_errorloc" class="error"></div>
+                    <div class="input-group">
+                        <!--onchange is used for changing 'storage location selection box' value into locations that belong to the selected warehouse-->
+                        <select  id="warehouse_id_select" name="warehouse_id" class="form-control" onchange="displayStorageLocationIdList(this.value)">
+                            <option selected disabled>Please select a warehouse</option>
+                            <?php
+                                //fetch the result to an array
+                                while($row_warehouse = mysqli_fetch_assoc($query_warehouse)){
+                            ?>
+                            <option value="<?php echo $row_warehouse['warehouse_id'];?>"><?php echo $row_warehouse['warehouse_name'];?></option>
+                            <?php } ?>
+                        </select>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--end of warehouse selection-->
+
+                <!--start of storage location selection-->
+                <div class="form-group col-sm-4 ">
+                    <label>Storage Location</label>
+                    <!--display the error line of code-->
+                    <div id="myForm_warehouse_storage_location_id_errorloc" class="error"></div>
+                    <div class="input-group">
+                        <select  id="storage_location_id_select"  name="storage_location_id" class="form-control" onchange="displayStorageLocationDetails(this.value, 'storage_location_detail_display')">
+                            <option value="0" selected disabled>Please select a warehouse first</option>
+                        </select>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--end of storage location selection-->
+                <div class="clearfix"></div>
+                <!--Display storage location information as user select from select input above-->
+                <div class="form-group" id="storage_location_detail_display" hidden>
+                    <label style="text-decoration: underline">Storage Location Details:</label>
+                    <div class="clearfix"></div>
+                    <div class="col-sm-3">
+                        <label>Storage Location Shelf</label>
+                        <input class="form-control" name="storage_location_shelf" id="storage_location_shelf" readonly>
+                    </div>
+                    <div class="col-sm-3">
+                        <label>Storage Location Row</label>
+                        <input class="form-control" name="storage_location_row" id="storage_location_row" readonly>
+                    </div>
+                    <div class="col-sm-3">
+                        <label>Storage Location Column</label>
+                        <input class="form-control" name="storage_location_column" id="storage_location_column" readonly>
+                    </div>
+                    <div class="col-sm-3">
+                        <label>Storage Location Condition</label>
+                        <input class="form-control" name="storage_location_condition" id="storage_location_condition" readonly>
+                    </div>
+                </div>
+
+            </fieldset>
+            <br><br>
+            <!--<script language="javascript">
+                populateCountries("warehouse_id_select", "storage_location_id_select");
+            </script>-->
+            <div class="clearfix"></div>
+
+            <!--Dynamic Form Processing with PHP-->
+            <div class="form-group">
+                <legend>Item</legend>
+                <input class="btn btn-success fa" value="&#xf0fe;" style='width:4%' title="Add New Row To Item Line" onClick="addRow('dataTableReceipt', 'receipt')" />
+                <input class="btn btn-danger fa" value="&#xf147;" style='width:4%' title="Delete Checked Rows of the Item Line" onClick="deleteRow('dataTableReceipt', 'receipt')"  />
+                <!--Add new item button is for when user want to create new item that has not yet existed in database, this is to make it more convenient for user, instead of go back to previous page to add new item-->
+                <a class="btn btn-default" data-toggle="tooltip" title="Create New Item" href="create_item.html">Add new Item  <span class="fa fa-edit" ></span></a>
+                <!--this button is to reload the item name selection box, in case that user add new item to the database, this button will retrieve new data from database-->
+                <input class="btn btn-warning fa" value="&#xf021;" title="Refresh Item Select List" style='width:4%'>
+                <p>(All acions apply only to entries with check marked check boxes only.)</p>
+                <div id="myForm_errorloc" class="error"></div>
+                <table id="dataTableReceipt" class="table">
+                    <tr>
+                        <th></th>
+                        <th hidden>
+                            <label hidden>Transaction Line ID</label>
+                        </th>
+                        <th>
+                            <label>Item Name</label>
+                        </th>
+						<th>
+							<label>Vendor Name</label>
+						</th>
+                        <th style="width:5%">
+                            <label>Quantity</label>
+                        </th>
+                        <th>
+                            <label>Unit Cost</label>
+                        </th>
+                        <th>
+                            <label>Line Total Cost</label>
+                        </th>
+
+                    </tr>
+                    <tr id="row-0">
+                        <td id="row-0_col-0"><input type="checkbox"  name="chk[]"/></td>
+                        <td id="row-0_col-1" hidden>
+                            <input hidden type="text" style="width:90%"  name="warehouse_transaction_line_id[]" >
+                        </td>
+                        <td id="row-0_col-2">
+                            <!--load all the item in the item table. display item name and store item id as value of option -->
+                            <select class="form-control" id="item_id_select_0" name="item_id[]"  onchange="displayItemDetails(document.getElementById(this.id).value, this.id,'receipt')">
+                                <?php
+                                    //set up sql query to list all items
+                                    $sql_item_select = "SELECT item_id, item_name FROM item";
+                                    //connect to db via $db and execute the sql
+                                    $result_item_select = mysqli_query($db, $sql_item_select);
+                                    //fetch the result to an array
+                                    while($row_item_select = mysqli_fetch_assoc($result_item_select))
+                                    {
+                                    echo "<option value=" . $row_item_select['item_id'] . ">" . $row_item_select['item_name'] . "</option>";
+                                    }
+                                ?>
+                            </select>
+                        </td>
+						<td id="row-0_col-3">
+							<input class="form-control" type="text" style="width:90%"  name="item_vendor[]">
+						</td>
+                        <td id="row-0_col-4">
+                            <input class="form-control" type="text" style="width:90%"  name="item_quantity[]" onchange="calculatePrice('row-0','receipt')" min="0">
+                        </td>
+                        <td id="row-0_col-5">
+                            <input class="form-control" type="text" style="width:90%" name="item_cost[]" onchange="calculatePrice('row-0','receipt')" min="0" >
+                        </td>
+                        <td id="row-0_col-6">
+                            <input class="form-control" type="text" style="width:90%" name="item_total_cost[]" min="0" >
+                        </td>
+
+                    </tr>
+                </table>
+                <div class="clear"></div>
+                <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
+            </div>
+
+                <div class="form-group pull-right">
+                    <table>
+                        <tr>
+                            <td class="text-right"><label>Item Total Cost:</label></td>
+                            <td> <input class="form-control readonly" name="total_transaction" id="total" value="" readonly> </td>
+                        </tr>
+                        <tr hidden>
+                            <td class="text-right"><label>Item Total Quantity:</label></td>
+                            <td> <input class="form-control readonly" name="total_quantity" id="totalquantity" value="" > </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="clearfix"></div>
+                <!--submit button-->
+                <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default pull-right">
+            </div>
+        </form>
+</div>
+
+<div id="footer"></div>
+
+<!--script to validate inputs
+Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+<script language="JavaScript" type="text/javascript">
+//You should create the validator only after the definition of the HTML form
+var frmvalidator  = new Validator("myForm");
+frmvalidator.EnableOnPageErrorDisplay();
+frmvalidator.EnableMsgsTogether();
+
+</script>
+<script>
+    function displayCurrencyRate(){
+        $("#exchange_rate_display").attr({readonly : false, value : $("#exchange_rate").val(), readonly: true});
+    }
+</script>
+</body>
+</html>

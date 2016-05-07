@@ -1,0 +1,323 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+
+    //declare timezone and current date, time
+    date_default_timezone_set("Asia/Ho_Chi_Minh");
+
+    // set the current date
+    $current_date = date("Y-m-d");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/partialsScript.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/countries.js"></script>
+    <script src="../js/customScript.js"></script>
+    <style>
+        .border-less td, .border-less th {
+            border: none !important;
+        }
+        .no-warp label{
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!--display header + navigation bar-->
+    <div id="header"></div>
+
+    <!--start container -->
+    <div class="container">
+        <form role="form" name="myForm" action="../php/item_issue.php" method="post">
+
+            <!--display title + current date-->
+            <h2 class="text-center">Good Issue - <?php echo date('Y / m / d', strtotime((string)$current_date));?></h2>
+
+            <!--store the creation date of transaction-->
+            <input hidden name="transaction_date" value="<?php echo $current_date;?>">
+
+            <!--display order general details-->
+            <div class="form-group">
+                <!--add and remove order line is eliminated, user can only reduce quantity to 0 if they do not want to issue the item for this order-->
+
+                <!--select an order as reference-->
+                <label>Select Order</label>
+
+                <div class="input-group">
+                     <select id="order_id" name="order_id" class="form-control" onchange="displayOrderDetails(this.value,'displayOrderTable', 'dataTableOrder')">
+                         <option value="0" selected disabled>--Please Select Order--</option>
+                         <!--insert an option for each order-->
+                         <?php
+                             //set up the sql to select the record that has the corresponding order_id
+                             $sql_order_select = "SELECT *, customer.customer_name FROM customer_order JOIN customer ON customer_order.customer_id = customer.customer_id WHERE order_status <> 'Deleted' ORDER BY customer_order.order_id ASC";
+
+                             //run the query to get the customer_order
+                             $query_order_select = mysqli_query($db,$sql_order_select);
+
+                             //fetch the result to an array
+                             while($row_order_select = mysqli_fetch_assoc($query_order_select)) {
+                         ?>
+
+                         <option value="<?php echo $row_order_select['order_id'];?>"> <?php echo $row_order_select['order_id']." - ".$row_order_select['customer_name']." - ".date('Y/m/d', strtotime((string)$row_order_select['order_create_date']))." - ".$row_order_select['order_status'];?> </option>
+
+                         <?php } ?>
+                      </select>
+
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                </div>
+            </div>
+            <!--Display customer information as user select from select input above-->
+            <fieldset id="displayOrderTable" hidden>
+                <legend>Order General Details</legend>
+                <table class="table border-less no-warp" >
+                    <!--start of displaying the fields in 2 columns-->
+                    <tbody>
+                        <!--start of displaying name-->
+                        <tr>
+                            <td>
+                                <label>Customer Full Name</label>
+                            </td>
+                            <td>
+                                <div class="form-group col-sm-12">
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_long_name_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="customer_long_name" name="customer_long_name" placeholder="Customer Full Name" readonly>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!--end of displaying name-->
+
+                        <!--start of displaying customer billing address-->
+                        <tr>
+                            <td>
+                                <label>Billing Address</label>
+                            </td>
+                            <td>
+                                <div class="form-group col-sm-12">
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_billing_address_street_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:100%" class="form-control" id="customer_billing_address" name="customer_billing_address" placeholder="Customer Billing Address" readonly>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <!--end of displaying customer billing address-->
+
+                        <!--start of displaying customer shipping address-->
+                        <tr>
+                            <td>
+                                <label>Shipping Address</label>
+                            </td>
+                            <td>
+                                <!--start of displaying customer shipping address-->
+                                <div class="form-group col-sm-12">
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_shipping_address_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <input type="text" style="min-width:100%" class="form-control" id="customer_shipping_address" name="customer_shipping_address">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                                <!--end of displaying customer shipping address-->
+                            </td>
+                        </tr>
+                        <!--end of displaying customer shipping address-->
+                    </tbody>
+                    <!--end of displaying the fields in 2 columns-->
+                </table>
+            </fieldset>
+            <!--end of displaying customer information as user select from select input-->
+
+            <div class="form-group col-sm-4"></div>
+
+            <!--start of currency name-->
+            <div class="form-group col-sm-4">
+                <label>Currency</label>
+                <!--display the error line of code-->
+                <div id="myForm_exchange_rate_name_errorloc" class="error"></div>
+                <div class="input-group">
+                    <!--Display the exchange rate for select-->
+                    <select  id="exchange_rate"  name="exchange_rate" class="form-control" onchange="displayCurrencyRate()">
+                        <option value="1">VND</option>
+                        <?php
+                                $url = "http://www.vietcombank.com.vn/exchangerates/ExrateXML.aspx";
+                                $read_xml = simplexml_load_file($url);
+                                for ($i=0;$i<count($read_xml->Exrate,1);$i++) {
+                        echo "<option value=".$read_xml->Exrate[$i]['Sell'].">".$read_xml->Exrate[$i]['CurrencyName']."</option>";
+                        }
+                        ?>
+                    </select>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                </div>
+            </div>
+            <!--end of currency name-->
+
+            <!--start of Exchange Rate-->
+            <div class="form-group col-sm-4 pull-right">
+                <label>Currency Exchange Rate</label>
+                <!--display the error line of code-->
+                <div id="myForm_exchange_rate_value_errorloc" class="error"></div>
+                <div class="input-group">
+                    <input id="exchange_rate_display" type="text" class="form-control" name="exchange_rate_display" placeholder="Currency Rate" readonly>
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                </div>
+            </div>
+            <!--end of Exchange Rate-->
+
+            <!--display transaction line details-->
+            <div class="form-group">
+                <legend>Transaction</legend>
+
+                <!--add/remove line buttons-->
+                <input type="button" class="btn btn-success fa" value="&#xf0fe;" style='width:4%' title="Add New Row To Order Line Table" onClick="addRow('dataTableOrder','issue')" />
+                <input type="button" class="btn btn-danger fa" value="&#xf147;" style='width:4%' title="Delete Checked Rows of Order Line Table" onClick="deleteRow('dataTableOrder','issue')"  />
+                <p>(All actions apply only to entries with check marked check boxes only.)</p>
+                <div id="myForm_errorloc" class="error"></div>
+
+<!--                <p id="transaction_line_notice">Please select an order to proceed issuing item</p>-->
+
+                <!--display transaction line-->
+                <table id="dataTableOrder" class="table">
+                    <tr>
+                        <th></th>
+                        <th hidden>
+                            <label hidden>Order Line ID</label>
+                        </th>
+                        <th>
+                            <label>Item Code</label>
+                        </th>
+                        <th>
+                            <label>Item Name</label>
+                        </th>
+                        <th>
+                            <label>I/O Qty</label>
+                        </th>
+                        <th>
+                            <label>Issue Qty</label>
+                        </th>
+                        <th>
+                            <label>Str Loc</label>
+                        </th>
+                        <th>
+                            <label>In-stock</label>
+                        </th>
+                        <th>
+                            <label>UoM</label>
+                        </th>
+                        <th>
+                            <label>Order Delivery Date</label>
+                        </th>
+                        <th>
+                            <label>Value</label>
+                        </th>
+                        <th hidden>
+                            <label>Single Price</label>
+                        </th>
+                    </tr>
+
+                    <!--based on selected order line, display corresponding details + set up fields for transaction line-->
+                    <tr id="row-0">
+                        <td id="row-0_col-0"><input type="checkbox"  name="chk[]"/></td>
+                        <td id="row-0_col-1" hidden>
+                            <input hidden type="text" style="width:90%"  name="order_line_id[]" id="order_line_id_0" >
+                        </td>
+                        <td id="row-0_col-2">
+                            <!--load all the item in the item table. display item name and store item id as value of option -->
+                            <select class="form-control" id="item_id_select_0" name="item_id[]" style="width:120px" onchange="displayOrderLineDetails(this.selectedIndex, this.id)">
+                            </select>
+                        </td>
+                        <td id="row-0_col-3">
+                            <!--load all the item in the item table. display item name and store item id as value of option -->
+                            <select class="form-control" id="item_name_select_0" name="item_name[]" style="width:190px" onchange="displayOrderLineDetails(this.selectedIndex, this.id)">
+                            </select>
+                        </td>
+                        <td id="row-0_col-4">
+                            <input class="form-control" type="text"   name="issued_ordered_quantity[]" id="issued_ordered_quantity_0" min="0" readonly style="max-width: 70px; padding: 0px 0px 0px 3px">
+                        </td>
+                        <td id="row-0_col-5">
+                            <input class="form-control" type="text"   name="issue_quantity[]" oninput="calculatePrice('row-0', 'issue')" style="max-width: 50px; padding: 0px 0px 0px 3px">
+                        </td>
+                        <td id="row-0_col-6">
+                            <!--load all the item in the item table. display item name and store item id as value of option -->
+                            <select class="form-control" id="storage_location_select_0" name="storage_location_id[]" style="padding: 0px 0px 0px 3px" onchange="displayItemStorageLocationDetails(this.selectedIndex, this.id)">
+                            </select>
+                        </td>
+                        <td id="row-0_col-7" style="width:7%">
+                            <input class="form-control" type="text"  name="inStock[]" id="inStock" readonly style="padding: 0px 0px 0px 3px">
+                        </td>
+                        <td id="row-0_col-8" style="width:7%">
+                            <input class="form-control" type="text"  name="item_unit_of_measurement[]" id="item_unit_of_measurement" readonly style="padding: 0px 0px 0px 3px">
+                        </td>
+                        <td id="row-0_col-9">
+                            <input class="form-control" type="date" style="width:90%" name="order_line_delivery_date[]" id="order_line_delivery_date" readonly>
+                        </td>
+                        <td id="row-0_col-10">
+                            <input class="form-control" type="text" style="width:90%" name="transaction_line_value[]" min="0" readonly>
+                        </td>
+                        <td id="row-0_col-11" hidden>
+                            <input class="form-control" type="text" style="width:90%" name="transaction_line_single_price[]" min="0" readonly hidden="true">
+                        </td>
+                    </tr>
+                </table>
+
+                <!--display the total value of transaction-->
+                <div class="form-group col-sm-offset-8">
+                    <table >
+                        <tr>
+                            <td class="text-right"><label>Total Value of Transaction:</label></td>
+                            <td>
+                                <input id="netTotal" hidden>
+                                <input name="total" id="total" class="readonly" value="" readonly>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!--display the issue note-->
+                <div class="form-group">
+                    <label>Issue Note</label>
+                    <div class="input-group">
+                        <textarea name="issue_note" class="form-control" rows="2"></textarea>
+                        <span class="input-group-addon"><span class="glyphicon"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <!--submit button-->
+            <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
+                <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
+            </div>
+        </form>
+    </div>
+
+    <div id="footer"></div>
+
+    <!--script to validate inputs
+    Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+    <script language="JavaScript" type="text/javascript">
+        //You should create the validator only after the definition of the HTML form
+        var frmvalidator  = new Validator("myForm");
+        frmvalidator.EnableOnPageErrorDisplaySingleBox();
+        frmvalidator.EnableMsgsTogether();
+    </script>
+</body>
+</html>

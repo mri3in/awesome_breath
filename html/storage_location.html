@@ -7,16 +7,17 @@
 <html>
     <head>
         <!--include the search JS-->
-		<script src="../js/deleteItem.js"></script>
-		<script src="../js/redirectTab.js"></script>
-		<script src="../js/currencyFormat.js"></script>
+        <!--<script src="../js/showSearchStorageLocation.js"></script>-->
+        <script src="../js/deleteStorageLocation.js"></script>
+		<!--<script src="../js/redirectTab.js"></script>-->
         <script src="../js/customScript.js"></script>
         <script src="../js/datatables.min.js"></script>
         <link rel="stylesheet" type="text/css" href="../css/datatables.min.css">
 
+        <!--disable enter key on the form in this page-->
         <script>
             // the jQuery.dataTables.js sometimes takes longer time to load so we need to delay the assignment
-            $(window).load(setTimeout(assignDataTable('itemTable'), 30 ));
+            $(window).load(setTimeout(assignDataTable('storageLocationTable'), 30 ));
 
             // enable redirection to go to correct tab
             $(window).load(redirectTab());
@@ -24,21 +25,21 @@
     </head>
     
     <body>
-	<form name="frmItem" method="POST" action ="">
+        <form name="frmStorageLocation" method="POST" action ="">
         <div class="container">
           <!--Page Title-->
-          <h1>Item</h1><br/>
+          <h1>Storage Location</h1><br/>
 
-            <!-- Form Control -->    
+            <!-- Form Control -->
             <table>
                 <tr>
                     <!--create button for creating new item | delete item-->
                     <td>
-                        <a class="btn btn-default" data-toggle="tooltip" title="Create New Item" href="create_item.html">
+                        <a class="btn btn-default" data-toggle="tooltip" title="Create New Storage Location" href="create_storage_location.html">
                         <span class="fa fa-plus" ></span></a> 
-						<button class="btn btn-danger"name="deleteItem" value="Delete"  onClick="setItemAction();">
+						<button class="btn btn-danger"name="deleteItem" value="Delete"  onClick="setDeleteStorageLocationAction();">
 						<i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Item"></i></button>
-                    </td>
+                    </td>    
 
                 </tr>
             </table>
@@ -47,37 +48,31 @@
             <br/><br/>
 
             <!--display a table to load all the item by default. in case of searching, load the result of the search-->
-            <div class="container " >
+            <div class="container "  >
                 <?php
-                    //load all the item by default
-                    //run sql to select all the item
-                    $sql = "SELECT item.item_id, item.item_name, item.item_unit_of_measurement, item.item_quantity, item.item_unit_price, item.item_vendor, item.item_description, 
-					item_category.item_category_name,item.item_cost,item.item_photo
-					FROM item
-					JOIN item_category
-                    ON item.item_category_id =item_category.item_category_id
-                    WHERE item_status <> 'Deleted'";
-                    
+                    //load all the StorageLocation by default
+                    //run sql to select all the StorageLocation
+                    $sql = "SELECT storage_location.storage_location_id, storage_location.storage_location_shelf, storage_location.storage_location_row, storage_location.storage_location_column, storage_location.storage_location_condition, warehouse.warehouse_name
+					FROM storage_location
+					JOIN warehouse
+                    ON storage_location.storage_location_warehouse_id = warehouse.warehouse_id
+                    WHERE storage_location_condition <> 'Deleted'";
+
                     //connect to db via $db and execute the sql
                     $result = mysqli_query($db, $sql);
 
                     //if the number of results is greater than 0, generate a table and load the data to its rows
                     if (mysqli_num_rows($result) > 0) {
                     echo "
-                        <table class='table sortable' id='itemTable'>" . "
-                        <thead>
-                            <tr>
+                        <table class='table sortable' id='storageLocationTable'>" . "
+                        <thead><tr>
                             <th></th>
                             <th>ID</th>
-                            <th>Item Name</th>
-                            <th>Unit</th>
-							<th>Quantity</th>
-							<th>Item Cost</th>
-							<th>Unit Price</th>
-							<th>Category</th>
-							<th>Vendor</th>
-                            <th>Description</th>
-							<th>Item Photo</th>
+                            <th>Shelf</th>
+                            <th>Row</th>
+							<th>Column</th>
+							<th>Condition</th>
+							<th>Warehouse Name</th>
                         </tr></thead><tbody>";
 
                         //fetch the results to table rows, the customer_name should have the link to the edit page
@@ -90,22 +85,18 @@
 						if(isset($classname));
                             echo
                             "<tr id=" . "link>" . "
-                            <td><input type=" . "checkbox name='item[]'
-							value =".$row['item_id']."></td>
+                            <td><input type=" . "checkbox name='storage_id[]'
+							value =".$row["storage_location_id"]."></td>
                             <td>
-                                <a href=" . "edit_item.html?item_id=" . $row["item_id"] .">
-                                " . $row["item_id"]. "
+                                <a href=" . "edit_storage_location.html?storage_location_id=" . $row["storage_location_id"] .">
+                                " . $row["storage_location_id"]. "
                                 </a>
                             </td>
-                            <td>" . $row["item_name"]. "</td>
-                            <td>" . $row["item_unit_of_measurement"]. "</td>
-                            <td>" . $row["item_quantity"]. "</td>
-							<td class=" . "numbers" . ">" . $row["item_cost"]. "</td>
-                            <td class=" . "numbers" . ">" . $row["item_unit_price"]. "</td>
-                            <td>" . $row["item_category_name"]. "</td>
-                            <td>" . $row["item_vendor"]. "</td>
-							<td>" . $row["item_description"]. "</td>
-							<td> <img class ='image-fixed' src ='".$row["item_photo"]."'/>
+                            <td>" . $row["storage_location_shelf"]. "</td>
+                            <td>" . $row["storage_location_row"]. "</td>
+                            <td>" . $row["storage_location_column"]. "</td>
+                            <td>" . $row["storage_location_condition"]. "</td>
+                            <td>" . $row["warehouse_name"]. "</td>
                         </tr>";
                         }
 
@@ -119,7 +110,6 @@
                 ?>
             </div>
         </div>
-
     </body>
 </html>
 

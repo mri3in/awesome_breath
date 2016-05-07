@@ -1,0 +1,209 @@
+<?php
+//include the definition of database
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/partialsScript.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/countries.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script>
+        // set the default country to Vietnam and city to Ho Chi Minh city
+        $(window).load(setTimeout(function(){
+            populateCountries("country", "city");
+            $("#country").prop("selectedIndex", config.selectedCountryIndex.country);
+        }, 30));
+
+        $(window).load(setTimeout(function (){
+            populateStates("country", "city");
+            $("#city").prop("selectedIndex", config.selectedCountryIndex.city);
+        }, 50));
+    </script>
+</head>
+<body>
+
+    <div id="header"></div>
+
+    <div class="container">
+
+        <div class="row">
+            <!--establish the form for warehouse, the form will perform validation, after that, search function -->
+            <form role="form" name="myForm" id="myForm" action="../php/create_warehouse.php" method="post">
+
+                <!--define the title of the form + the note for * symbol-->
+                    <h2 class="text-center">Warehouse</h2>
+                    <div class="well well-sm col-sm-4 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                    <div class="clearfix"></div>
+
+                    <!--draw a outside border + display form legend-->
+                    <fieldset>
+                        <legend>Basic Information</legend>
+
+                        <!--display warehouse name-->
+                        <div class="form-group col-sm-3">
+                            <label>Warehouse Name</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_name_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="warehouse_name" placeholder="Warehouse Name"  >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <!--display warehouse responsible supervisor-->
+                        <div class="form-group col-sm-6 pull-right">
+                            <label>Supervisor</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_staff_id_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <!--select staff on the list-->
+                                <select id="staff_id" name="staff_id" class="form-control">
+                                    <option value="0" selected disabled>--Please Select Warehouse Supervisor--</option>
+                                    <?php
+                                        //get the desired staff by staff_id in URL
+
+                                        //set up the sql to select the record that has the corresponding staff_id
+                                        $sql_staff_select = "SELECT staff.staff_name,staff.staff_id FROM staff WHERE staff_end_date IS NULL";
+
+                                        //run the query to get the staff
+                                        $query_staff_select = mysqli_query($db,$sql_staff_select);
+
+                                        //fetch the result to an array
+                                        while($row_staff_select = mysqli_fetch_assoc($query_staff_select)) {
+                                            echo "<option value=".$row_staff_select["staff_id"].">".$row_staff_select["staff_name"]."</option>";
+                                    }
+                                    ?>
+                                </select>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <!--display warehouse location-->
+                        <div class="form-group">
+                            <label>Warehouse Location</label>
+
+                            <!--display warehouse location street-->
+                            <div class="form-group col-sm-12">
+                                <label>Street</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_warehouse_location_street_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" style="min-width:100%" class="form-control" name="warehouse_location_street" placeholder="Street" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display warehouse location country-->
+                            <div class="form-group col-sm-4">
+                                <label>Country</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_warehouse_location_country_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <select id="country" class="form-control" style="min-width:100%" name="warehouse_location_country" placeholder="Country"></select>
+                                    <!--<input type="text" style="min-width:100%" class="form-control" name="warehouse_billing_location_country" placeholder="Country" > -->
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display warehouse location city-->
+                            <div class="form-group col-sm-6 pull-right">
+                                <label>City</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_warehouse_location_city_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <select id="city" class="form-control" style="min-width:100%" name="warehouse_location_city" placeholder="City / State"></select>
+                                    <!--<input type="text" style="min-width:90%" class="form-control" name="warehouse_billing_location_city" placeholder="City" >-->
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <script language="javascript">
+                                populateCountries("country", "city");
+                            </script>
+
+                            <div class="clearfix"></div>
+                        </div>
+
+
+                        <div class="form-group col-sm-4">
+                            <label>Warehouse Capacity</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_capacity_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="warehouse_capacity" placeholder="Warehouse Capacity"  >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <div class="form-group">
+                            <label>Warehouse Item Category</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_item_category_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <?php
+                                        //set up the sql to select the record that has the corresponding staff_id
+                                        $sql_item_cat_select = "SELECT item_category.item_category_id,item_category.item_category_name FROM item_category";
+
+                                        //run the query to get the staff
+                                        $query_item_cat_select = mysqli_query($db,$sql_item_cat_select);
+
+                                        //fetch the result to an array
+                                        while($row_item_cat_select = mysqli_fetch_assoc($query_item_cat_select)) {
+                                            ?>
+                                <div class='checkbox'>
+                                    <label><input type='checkbox'  name='warehouse_item_category[]' value="<?php echo $row_item_cat_select['item_category_id'];?>"><?php echo $row_item_cat_select["item_category_name"];?></label>
+                                </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                    <!--submit button-->
+                    <input type="submit" name="submit" id="submit" value="Create" class="btn btn-default pull-right">
+            </form>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <!--script to validate inputs
+    Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+    <script language="JavaScript" type="text/javascript">
+        //You should create the validator only after the definition of the HTML form
+        var frmvalidator  = new Validator("myForm");
+        frmvalidator.EnableOnPageErrorDisplay();
+        frmvalidator.EnableMsgsTogether();
+
+        frmvalidator.addValidation("warehouse_name","req","warehouse Name is required");
+
+        frmvalidator.addValidation("warehouse_location_address_street","req","Location is required");
+        frmvalidator.addValidation("warehouse_location_address_city","req","Location is required");
+        frmvalidator.addValidation("warehouse_location_address_country","req","Location is required");
+
+        frmvalidator.addValidation("staff_id","req","Supervisor is required");
+
+        frmvalidator.addValidation("warehouse_capacity_term","req","Warehouse Capacity is required");
+        frmvalidator.addValidation("warehouse_capacity_term","num","Warehouse Capacity is number only");
+    </script>
+</body>
+</html>

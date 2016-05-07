@@ -1,30 +1,12 @@
-<?php
-    //include the definition of database
-    include('../config.php');
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-    <script src="../js/jquery-2.1.4.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/partialsScript.js"></script>
-    <script src="../lib/angular/angular.min.js"></script>
-    <script src="../js/gen_validatorv4.js"></script>
-    <script src="../js/displayCustomerDetails.js"></script>
-    <script src="../js/orderLineCalculate.js"></script>
-    <script src="../js/bootbox.min.js"></script>
-    <script src="../js/confirmScript.js"></script>
-    <script src="../js/currencyFormat.js"></script>
-    <script src="../js/customScript.js"></script>
-    <script src="../js/countries.js"></script>
-    
+    <script>
+        // after window load 30 milliseconds, set the default selected option in line to null
+        $(window).load(setTimeout(function(){
+            $("#item_id_select_0").val(0);
+        }, 30));
+    </script>
 </head>
 <body>
 
@@ -33,112 +15,41 @@
 <div class="container">
 
     <div class="row">
+        <form role="form" name="myForm" id="myForm" action="../php/create_order.php" method="post">
 
-        <?php
-            //get the desired customer by customer_id in URL
-            if (isset($_GET['order_id'])) {
-                //get the param in URL of customer_id
-                $edit_order_id = $_GET['order_id'];
+                    <h2 class="text-center">Order</h2>
+                <!-- define the note for * symbol-->
+                <div class="well well-sm col-sm-2 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                <!-- display the order ID -->
+                <div class="well well-sm col-sm-2 text-center pull-right"><strong>Order ID: </strong></div>
+                <!--clear floating display style so that all input can display vertically-->
+                <div class="clearfix"></div>
+                <div class="form-group ">
 
-                //echo $edit_order_id;
+                    <label>Customer Name</label>
+                    <div class="input-group  col-sm-4">
+                        <select id="customer_id_select" name="customer_id" class="form-control" onchange="displayCustomerDetails(document.getElementById('customer_id_select').value, 'dataTableCustomer')">
+                            <option value="0" selected disabled>--Please Select Customer Name--</option>
+                            <?php
+                                // set up the sql to select the record that has the corresponding customer_id
+                                $sql_customer_select = "SELECT customer.customer_name,customer.customer_id FROM customer WHERE customer_status <> 'Deleted'";
+                                // run the query to get the customer
+                                $query_customer_select = mysqli_query($db,$sql_customer_select);
+                                // fetch the result to an array
+                                while($row_customer_select = mysqli_fetch_assoc($query_customer_select)) {
+                            ?>
 
-                //load all the order by default
-                //run sql to select all the order
-                $sql = "SELECT *, customer.customer_id, customer_name FROM customer_order
-                    JOIN customer
-                        ON customer_order.customer_id = customer.customer_id
-                    WHERE customer_order.order_id = '$edit_order_id'";
+                            <option value="<?php echo $row_customer_select['customer_id'];?>"><?php echo $row_customer_select["customer_name"];?></option>
+                            <?php } ?>
+                        </select>
+                    
 
-                //connect to db via $db and execute the sql
-                $result = mysqli_query($db, $sql);
-
-                //fetch the result to an array
-                $row = mysqli_fetch_assoc($result);
-
-                $order_shipping_address = $row['order_shipping_address'];
-                //split the string and assign to the variables
-                if ($order_shipping_address != ""){
-                    list($order_shipping_address_street, $order_shipping_address_city, $order_shipping_address_country) = explode(";", $order_shipping_address);
-                }
-        
-                //if no value, set the text to N-A
-                $orderReference = $row['order_reference'];
-                if ($row['order_reference'] == 0){
-                    $orderReference = "No Quotation";
-                }
-            }
-        ?>
-        
-        <form id="myForm" role="form" name="myForm" action="../php/edit_order.php" method="post">
-
-            <h2 class="text-center">Order</h2>
-            <!-- define the note for * symbol-->
-            <div class="well well-sm col-sm-2 text-center">
-                <strong>
-                    <span class="glyphicon glyphicon-asterisk"></span>
-                    Required Field
-                </strong>
-            </div>
-
-            <!-- display the order ID -->
-            <div class="well well-sm col-sm-2 text-center pull-right">
-                <strong>Order ID:
-                    <input name="order_id" style="width:15%" class="readonly" value="<?php echo $edit_order_id;?>">
-                </strong>
-            </div>
-            <div class="clearfix"></div>
-            <!--check if display quotation ID or not-->
-            <?php
-                //if no value, hide the button the quotation page
-                if ($row["order_reference"] != 0){
-            ?>
-                <div class="well well-sm col-sm-2 text-center pull-right">
-                    <?php
-                        echo "<a href=edit_quotation.html?quotation_id=" . $row['order_reference']. " >
-                            <strong>Quotation ID:
-                                <input class='readonly' style='width:15%' name='order_reference' value=".$row['order_reference'].">
-                            </strong></a>";
-                    ?>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
                 </div>
-            <?php } ?>
-
-            <!--clear floating display style so that all input can display vertically-->
-            <div class="clearfix"></div>
-            <div class="form-group">
-
-                <label>Customer Name</label>
-                <div class="input-group col-sm-4">
-
-                    <!--run script to set the default option of select box to be the corresponding name of customer-->
-                    <!--<script>-->
-                    <!--$(document).ready(function() {-->
-                    <!--$("#customer_name_select").val("<?php echo $row['customer_id'];?>");-->
-                    <!--});-->
-                    <!--</script>-->
-
-                    <select id="customer_id_select" name="customer_id" class="form-control" disabled>
-                        <!--<option value="0" selected disabled>&#45;&#45;Please Select Customer Name&#45;&#45;</option>-->
-
-                        <?php
-                                //Option values are added by looping through the array
-                                echo "<option value=" . $row["customer_id"] . ">" . $row["customer_name"] . "</option>";
-                        ?>
-                    </select>
-
-                    <!--store the value to a hidden input because disabled select is ignored during form posting-->
-                    <input name="customer_id" hidden value="<?php echo $row['customer_id'];?>">
-
-                    <!--run the script to load corresponding customer details based on the change of customer name-->
-                    <script>
-                        displayCustomerDetails(document.getElementById("customer_id_select").value,'dataTableCustomer');
-                    </script>
-
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                </div>
-            </div>
-
-            <!--Display customer information as user select from select input above-->
-                <fieldset id="dataTableCustomer">
+                
+                <!--Display customer information as user select from select input above-->
+                <fieldset id="dataTableCustomer" hidden>
                     <legend>Basic Information</legend>
                     <div>
                         <!--start of defining tabs-->
@@ -214,7 +125,7 @@
                                             <div class="form-group col-sm-12">
                                                 <label>Customer Status</label><br>
                                                 <!--status of customer -->
-                                                <input id="customer_status" class="form-control" name="customer_status">
+                                                <input id="customer_status" class="form-control" name="customer_status" readonly>
                                             </div>
                                             <!--end of displaying customer status-->
 
@@ -371,7 +282,7 @@
                                     <div id="myForm_customer_payment_term_errorloc" class="error"></div>
                                     <div class="input-group">
                                         <!--select payment term on the list-->
-                                        <input id="customer_payment_term" name="customer_payment_term" class="form-control">
+                                        <input id="customer_payment_term" name="customer_payment_term" class="form-control" readonly>
                                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                     </div>
                                 </div>
@@ -382,95 +293,64 @@
                         <!--end of displaying the fields in tabs-->
                     </div>
                 </fieldset>
-            <div class="form-group">
-                <label>Order Status</label>
-                <div class="input-group col-sm-4">
-                    <input id="order_status" name="order_status" class="form-control" value="<?php echo $row['order_status'];?>" readonly>
-                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                </div>
-            </div>
-            <!--Order line starts here-->
-            <!--connect db to load order line data-->
-            <?php
-                    $sql_order_line = "SELECT
-                        customer_order.order_id, customer_order.order_create_date, customer_order.order_status, customer_order.customer_id,
-                        customer.customer_name, customer.customer_id,
-                        customer_order.order_total, customer_order.order_reference,
-                        order_line.order_line_id, order_line.order_line_item_id, order_line.order_line_item_quantity, order_line.order_line_deliver_date, order_line.order_line_selling_price, order_line.order_line_net_selling_price,
-                        item.item_name,item.item_unit_of_measurement, item.item_vendor, item.item_manufacturer, item.item_unit_price, item.item_VAT
-                    FROM customer_order
-                    JOIN customer
-                        ON customer_order.customer_id =customer.customer_id
-                    JOIN order_line
-                        ON customer_order.order_id = order_line.order_id
-                    JOIN item
-                        ON order_line.order_line_item_id = item.item_id
-                    WHERE customer_order.order_id = '$edit_order_id'";
+                <div class="form-group hidden">
+                        <label>Order Status</label>
+                        <div class="input-group col-sm-4">
+                            <input id="order_status_select" name="order_status" class="form-control" value="Processed">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                </div>        
 
-                    //run the query to get the required details
-                    $query_order_line = mysqli_query($db,$sql_order_line) or die ("Error: Cannot found order lines");
-                ?>
+                <!--Dynamic Form Processing with PHP-->
+                <div class="form-group">
+                    <legend>Order Line</legend>
 
-            <!--Dynamic Form Processing with PHP-->
-            <div class="form-group">
-                <legend>Order Line</legend>
+                    <input type="button" class="btn btn-success fa" value="&#xf0fe;" style='width:4%' title="Add New Row To Item Line" onClick="addRow('dataTableOrder','order')" />
+                    <input type="button" class="btn btn-danger fa" value="&#xf147;" style='width:4%' title="Delete Checked Rows of the Item Line" onClick="deleteRow('dataTableOrder','order')"  />
 
-                <input type="button" class="btn btn-success fa" value="&#xf0fe;" style='width:4%' title="Add New Row To Item Line" onClick="addRow('dataTableOrder','order')" />
-                <input type="button" class="btn btn-danger fa" value="&#xf147;" style='width:4%' title="Delete Checked Rows of the Item Line" onClick="deleteRow('dataTableOrder','order')"  />
+                    <p>(All actions apply only to entries with check marked check boxes only.)</p>
+                    <div id="myForm_errorloc" class="error"></div>
+                    <table id="dataTableOrder" class="table" width="100%">
 
-                <p>(All actions apply only to entries with check marked check boxes only.)</p>
-                <div id="myForm_errorloc" class="error"></div>
-                <table id="dataTableOrder" class="table">
-                    <tr>
-                        <th></th>
-                        <th hidden>
-                            <label>Order Line ID</label>
-                        </th>
-                        <th>
-                            <label>Item Name</label>
-                        </th>
-                        <th>
-                            <label>Manufacturer</label>
-                        </th>
-                        <th style="width:5%">
-                            <label>Quantity</label>
-                        </th>
-                        <th>
-                            <label>Vendor</label>
-                        </th>
-                        <th style="width:5%">
-                            <label>Delivery Date</label>
-                        </th>
-                        <th>
-                            <label>Selling price</label>
-                        </th>
-                        <th>
-                            <label>Net selling price</label>
-                        </th>
-                        <th style="width:5%">
-                            <label>Tax</label>
-                        </th>
-                    </tr>
-
-                    <!--start to load and display the order lines of this order-->
-                    <?php
-                        //fetch the result to an array
-                        // multidimension array source: http://www.w3schools.com/php/php_arrays_multi.asp
-                        while($row_order_line = mysqli_fetch_assoc($query_order_line)){
-                            $array_order_line[] = $row_order_line;}
-                        //for each element of array, load a different record
-                        for ($array_count = 0; $array_count < count($array_order_line); $array_count++){
-                        ?>
-
-                    <tr id="row-<?php echo $array_count;?>">
-                        <td id="row-<?php echo $array_count;?>_col-0"><input type="checkbox"  name="chk[]"/></td>
-                        <td id="row-<?php echo $array_count;?>_col-1" hidden>
-                            <input type="text" style="width:90%" hidden  name="order_line_id[]" value="<?php echo $array_order_line[$array_count]['order_line_id'];?>">
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-2">
-                            <!--load all the item in the item table. display item name and store item id as value of option -->
-                            <select id="item_id_select_<?php echo $array_count;?>" style="width:300px" class="form-control" name="item_id[]" onchange="displayItemDetails(this.value, this.id,'order')">
-                                <?php
+                        <tr>
+                            <th></th>
+                            <th hidden>
+                                <label>Order Line ID</label>
+                            </th>
+                            <th>
+                                <label>Item Name</label>
+                            </th>
+                            <th>
+                                <label>Manufacturer</label>
+                            </th>
+                            <th style="width:5%">
+                                <label>Quantity</label>
+                            </th>
+                            <th>
+                                <label>Vendor</label>
+                            </th>
+                            <th style="width:5%">
+                                <label>Delivery Date</label>
+                            </th>
+                            <th>
+                                <label>Selling price</label>
+                            </th>
+                            <th>
+                                <label>Net selling price</label>
+                            </th>
+                            <th style="width:5%">
+                                <label>Tax</label>
+                            </th>
+                        </tr>
+                        <tr id="row-0">
+                            <td id="row-0_col-0"><input type="checkbox"  name="chk[]" /></td>
+                            <td id="row-0_col-1" hidden>
+                                <input hidden type="text" style="width:90%"  name="order_line_id[]" >
+                            </td>
+                            <td id="row-0_col-2">
+                                <!--load all the item in the item table. display item name and store item id as value of option -->
+                                <select id="item_id_select_0" name="item_id[]" style="width:300px" class="form-control" onchange="displayItemDetails(this.value, this.id,'order')">
+                                    <?php
                                         //set up sql query to list all items
                                         $sql_item_select = "SELECT item_id, item_name FROM item";
                                         //connect to db via $db and execute the sql
@@ -478,78 +358,75 @@
                                         //fetch the result to an array
                                         while($row_item_select = mysqli_fetch_assoc($result_item_select))
                                         {
-                                            $selected = ($row_item_select['item_id'] == $array_order_line[$array_count]['order_line_item_id']) ? "selected='selected'" : "";
-                                            echo "<option value=" . $row_item_select['item_id'] . " " . $selected . ">" . $row_item_select['item_name'] . "</option>";
-                                }
-                                ?>
-                            </select>
-                            <!--<?php echo $array_order_line[$array_count]['item_name'];?>-->
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-3">
-                            <input type="text" style="width:90%" class="form-control" name="item_manufacturer[]" value="<?php echo $array_order_line[$array_count]['item_manufacturer'];?>" readonly>
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-4">
-                            <input type="text" style="width:100%" class="form-control" oninput="calculatePrice('row-<?php echo $array_count;?>','order')" name="order_line_item_quantity[]" min="0" value="<?php echo $array_order_line[$array_count]['order_line_item_quantity'];?>">
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-5">
-                            <input type="text" style="width:90%" class="form-control" name="item_vendor[]" value="<?php echo $array_order_line[$array_count]['item_vendor'];?>" readonly>
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-6">
-                            <input type="date" style="width:90%" class="form-control" name="order_line_delivery_date[]" value="<?php echo date('Y-m-d', strtotime((string)$array_order_line[$array_count]['order_line_deliver_date']));?>">
-                            <!--<?php echo date('Y/m/d', strtotime($array_order_line[$array_count]['order_line_deliver_date']));?>-->
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-7">
-                            <input type="text" style="width:90%" class="form-control" oninput="calculatePrice('row-<?php echo $array_count;?>','order')" name="order_line_selling_price[]" min="0" value="<?php echo $array_order_line[$array_count]['item_unit_price'];?>">
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-8">
-                            <input type="text" style="width:90%" class="form-control" name="order_line_net_selling_price[]" min="0" value="<?php echo $array_order_line[$array_count]['order_line_net_selling_price'];?>" readonly>
-                        </td>
-                        <td id="row-<?php echo $array_count;?>_col-9">
-                            <input type="text" style="width:90%" class="form-control" name="item_VAT[]" value="<?php echo $array_order_line[$array_count]['item_VAT'];?>" readonly>
-                        </td>
-                    </tr>
-                    <?php } ?>
-                </table>
-                <div class="clear"></div>
+                                    ?>
+
+                                    <option value="<?php echo $row_item_select['item_id'];?>"><?php echo $row_item_select['item_name'];?></option>
+                                    <?php } ?>
+                                </select>
+                            </td>
+                            <td id="row-0_col-3">
+                                <input type="text" style="width:90%"  class="form-control" name="item_manufacturer[]" >
+                            </td>
+                            <td id="row-0_col-4">
+                                <input type="text" style="width:100%" class="form-control" onchange="calculatePrice('row-0','order')" style="width:90%"  name="order_line_item_quantity[]" min="0">
+                            </td>
+                            <td id="row-0_col-5">
+                                <input type="text" style="width:90%"  class="form-control" name="item_vendor[]" >
+                            </td>
+                            <td id="row-0_col-6">
+                                <input type="date" style="width:90%" class="form-control" name="order_line_delivery_date[]">
+                            </td>
+                            <td id="row-0_col-7">
+                                <input type="text" style="width:90%" class="form-control"  onchange="calculatePrice('row-0', 'order')" name="order_line_selling_price[]" min="0" >
+                            </td>
+                            <td id="row-0_col-8">
+                                <input type="text" style="width:90%" class="form-control" name="order_line_net_selling_price[]" min="0">
+                            </td>
+                            <td id="row-0_col-9">
+                                <input type="text"  style="width:90%" class="form-control" name="item_VAT[]"  >
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="clear"></div>
                 <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
-            </div>
-
-            <div class="form-group">
-                <label>Note</label>
-                <div class="input-group">
-                    <textarea name="order_note" class="form-control" rows="2"><?php echo $row['order_note'];?></textarea>
-                    <span class="input-group-addon"><span class="glyphicon"></span></span>
                 </div>
-            </div>
 
-            <div class="form-group pull-right">
-                <table>
-                    <tr>
-                        <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
-                        <td> <input name="net_total_price" class="readonly numbers" id="netTotal" value="<?php echo $row['order_net_total'];?>"  readonly > </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right"><label>Tax:</label></td>
-                        <td> <input name="tax" id="totalTax" class="readonly" value="<?php echo $row['order_tax'];?>"  readonly> </td>
-                    </tr>
-                    <tr>
-                        <td class="text-right"><label>Total Price (Tax incl):</label></td>
-                        <td> <input name="total_order" id="total" class="readonly" value="<?php echo $row['order_total'];?>" readonly > </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="clearfix"></div>
-            <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
-                <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
-            </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <div class="input-group">
+                        <textarea name="order_note" class="form-control" rows="2"></textarea>
+                        <span class="input-group-addon"><span class="glyphicon"></span></span>
+                    </div>
+                </div>
+
+                <div class="form-group pull-right">
+                    <table>
+                        <tr>
+                            <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
+                            <td> <input name="net_total_price" id="netTotal" class="readonly" readonly > </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><label>Tax:</label></td>
+                            <td> <input name="tax" id="totalTax" class="readonly" readonly > </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right"><label>Total Price (Tax incl):</label></td>
+                            <td> <input name="total_order" id="total" class="readonly" readonly > </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+                <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
+                    <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
+                </div>
         </form>
     </div>
 </div>
 
 <div id="footer"></div>
 
-<!--script to validate inputs-->
-<!--Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+<!--script to validate inputs
+Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
 <script language="JavaScript" type="text/javascript">
     //You should create the validator only after the definition of the HTML form
 
@@ -557,16 +434,15 @@
     frmvalidator.EnableOnPageErrorDisplaySingleBox();
     frmvalidator.EnableMsgsTogether();
 
-    frmvalidator.addValidation("order_line_item_quantity[]","req","Please select quantity");
-    frmvalidator.addValidation("order_line_delivery_date[]","req","Please select date of delivery");
-    frmvalidator.addValidation("order_line_selling_price[]","req","Please select selling price");
-    frmvalidator.addValidation("item_VAT[]","req","Please enter Tax Percentage");
+    frmvalidator.addValidation("order_line_item_quantity","req","Please select quantity");
+    frmvalidator.addValidation("order_line_delivery_date","req","Please select date of delivery");
+    frmvalidator.addValidation("order_line_selling_price","req","Please select selling price");
+    frmvalidator.addValidation("item_VAT","req","Please enter Tax Percentage");
 
-</script>
-<script>
-    $("#" + config.customer.customerShippingAddressCountry).val("<?php echo $order_shipping_address_country;?>");
-    populateStates(config.customer.customerShippingAddressCountry, config.customer.customerShippingAddressCity);
-    $("#" + config.customer.customerShippingAddressCity).val("<?php echo $order_shipping_address_city;?>");
+    function myFunction() {
+        document.getElementsByTagName("H1")[0].setAttribute("class", "democlass");
+    }
+
 </script>
 </body>
 </html>

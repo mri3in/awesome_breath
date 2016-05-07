@@ -14,325 +14,42 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <script src="../js/jquery-2.1.4.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/script.js"></script>
+    <script src="../js/partialsScript.js"></script>
     <script src="../lib/angular/angular.min.js"></script>
     <script src="../js/gen_validatorv4.js"></script>
-    <script src="../js/orderLineCalculate.js"></script>
-    <script src="../js/displayCustomerDetails.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/countries.js"></script>
 
 </head>
 <body>
+    <?php
+        //get the desired customer by customer_id in URL
+        if (isset($_GET['quotation_id'])) {
+            //get the param in URL of customer_id
+            $convert_quotation_id = $_GET['quotation_id'];
 
-<div id="header"></div>
+            //load all the quotation by default
+            //run sql to select all the quotation
+            $sql_quotation = "SELECT *, customer.customer_id, customer_name FROM quotation
+                    JOIN customer
+                         ON quotation.customer_id = customer.customer_id
+                    WHERE quotation.quotation_id = '$convert_quotation_id'";
 
-<div class="container">
+            //connect to db via $db and execute the sql
+            $result_quotation = mysqli_query($db, $sql_quotation);
 
-    <div class="row">
-        <form role="form" name="myForm" action="" method="post">
-            <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
+            //fetch the result to an array
+            $row_quotation = mysqli_fetch_assoc($result_quotation);
 
-                    <h2 class="text-center">Order</h2>
-                <!-- define the note for * symbol-->
-                <div class="well well-sm col-md-4 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
-                <!-- display the order ID -->
-                <div class="well well-sm col-md-4 text-center pull-right"><strong>Order ID: </strong></div>
-                <!--clear floating display style so that all input can display vertically-->
-                <div class="clearfix"></div>
-                <div class="form-group">
-
-                    <label>Customer Name</label>
-                    <div class="input-group">
-                         <select id="customer_id_select" name="customer_id" class="form-control" onchange="displayCustomerDetails(document.getElementById('customer_id_select').value)">
-                            <option value="0" selected disabled>--Please Select Customer Name--</option>
-                            <?php
-                             //get the desired customer by customer_id in URL
-
-                            //set up the sql to select the record that has the corresponding customer_id
-                            $sql_customer_select = "SELECT customer.customer_name,customer.customer_id FROM customer";
-
-                            //run the query to get the customer
-                            $query_customer_select = mysqli_query($db,$sql_customer_select);
-
-                            //fetch the result to an array
-                            while($row_customer_select = mysqli_fetch_assoc($query_customer_select)) {
-
-                            echo "<option id ='myselect'value=".$row_customer_select["customer_id"].">".$row_customer_select["customer_name"]."</option>";
-
-                             }
-                            ?>
-                          </select>
-
-                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                    </div>
-                </div>
-                <!--Display customer information as user select from select input above-->
-                <!--Display customer information as user select from select input above-->
-                <div class="form-group" id="customer_detail_display">
-                    <p hidden>[Customer Description]</p>
-                </div>
-
-                <div class="form-group ">
-                        <label>Order Status</label>
-                        <div class="input-group">
-                            <select id="order_status_select" name="order_status" class="form-control">
-                                <option selected disabled>--Please Select Order Type--</option>
-                                <option value="Processed">Processed</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                            </select>
-                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                        </div>
-
-                <!--Dynamic Form Processing with PHP-->
-                <div class="form-group">
-                    <legend>Order Line</legend>
-                    <input type="button" value="Add New Order Line" onClick="addRow('dataTableOrder')" />
-                    <input type="button" value="Remove Checked Order Line" onClick="deleteRow('dataTableOrder')"  />
-                    <p>(All acions apply only to entries with check marked check boxes only.)</p>
-                    <div id="myForm_errorloc" class="error"></div>
-                    <table id="dataTableOrder" class="table">
-                        <tr>
-                            <th></th>
-                            <th>
-                                <label>Order Line ID</label>
-                            </th>
-                            <th>
-                                <label>Item Name</label>
-                            </th>
-                            <th>
-                                <label>Manufacturer</label>
-                            </th>
-                            <th>
-                                <label>Quantity</label>
-                            </th>
-                            <th>
-                                <label>Vendor</label>
-                            </th>
-                            <th>
-                                <label>Delivery Date</label>
-                            </th>
-                            <th>
-                                <label>Selling price</label>
-                            </th>
-                            <th>
-                                <label>Net selling price</label>
-                            </th>
-                            <th>
-                                <label>Tax</label>
-                            </th>
-                            <th>
-                                <label hidden>Total value</label>
-                            </th>
-                        </tr>
-                        <tr id="row_0">
-                            <td id="row-0_col-0"><input type="checkbox"  name="chk"/></td>
-                            <td id="row-0_col-1">
-                                <input type="text" style="width:90%"  name="order_line_id" >
-                            </td>
-                            <td id="row-0_col-2">
-                                <!--load all the item in the item table. display item name and store item id as value of option -->
-                                <select id="item_id_select_0" name="item_id" style="width:200px" onchange="displayItemDetails(document.getElementById(this.id).value, this.id)">
-                                    <?php
-                                //set up sql query to list all items
-                                $sql_item_select = "SELECT item_id, item_name FROM item";
-                                //connect to db via $db and execute the sql
-                                $result_item_select = mysqli_query($db, $sql_item_select);
-                                //fetch the result to an array
-                                while($row_item_select = mysqli_fetch_assoc($result_item_select))
-                                {
-                                echo "<option value=" . $row_item_select['item_id'] . ">" . $row_item_select['item_name'] . "</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </td>
-                            <td id="row-0_col-3">
-                                <input type="text" style="width:90%"  name="item_manufacturer" >
-                            </td>
-                            <td id="row-0_col-4">
-                                <input id="input_row-0_col-4" type="text" onchange="totalOrderTax('dataTableOrder','row-0')" style="width:90%"  name="order_line_item_quantity" min="0">
-                            </td>
-                            <td id="row-0_col-5">
-                                <input type="text" style="width:90%"  name="item_vendor" >
-                            </td>
-                            <td id="row-0_col-6">
-                                <input type="date" style="width:90%" name="order_line_delivery_date">
-                            </td>
-                            <td id="row-0_col-7">
-                                <input id="input_row-0_col-7" type="text" onchange="totalOrderTax('dataTableOrder','row_0')" style="width:90%" name="order_line_selling_price" min="0" >
-                            </td>
-                            <td id="row-0_col-8">
-                                <input id="input_row-0_col-8" type="text" style="width:90%" name="order_line_net_selling_price" min="0">
-                            </td>
-                            <td id="row-0_col-9">
-                                <input id="input_row-0_col-9" type="text" onchange="totalOrderTax('dataTableOrder','row_0')" style="width:90%" name="item_VAT"  >
-                            </td>
-                            <td id="row-0_col-10">
-                                <input hidden type="text" style="width:90%"  name="order_line_total_value" >
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="clear"></div>
-                    <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
-                </div>
-
-                    <div class="form-group">
-                        <label>Note</label>
-                        <div class="input-group">
-                            <textarea name="order_note" class="form-control" rows="2"></textarea>
-                            <span class="input-group-addon"><span class="glyphicon"></span></span>
-                        </div>
-                    </div>
-
-                    <div class="form-group pull-right">
-                        <table>
-                            <tr>
-                                <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
-                                <td> <input name="net_total_price" id="total" class="readonly"> </td>
-                            </tr>
-                            <tr>
-                                <td class="text-right"><label>Tax:</label></td>
-                                <td> <input name="tax" id="totalTax" class="readonly"> </td>
-                            </tr>
-                            <tr>
-                                <td class="text-right"><label>Total Price (Tax incl):</label></td>
-                                <td> <input name="total_order" id="totalOrder" class="readonly"> </td>
-                            </tr>
-                    </table>
-                </div>
-                <div class="clearfix"></div>
-                <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
-                    <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
-                </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="footer"></div>
-
-<!--script to validate inputs
-Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
-<script language="JavaScript" type="text/javascript">
-    //You should create the validator only after the definition of the HTML form
-
-    var frmvalidator  = new Validator("myForm");
-    frmvalidator.EnableOnPageErrorDisplaySingleBox();
-    frmvalidator.EnableMsgsTogether();
-
-    frmvalidator.addValidation("order_line_item_quantity[]","req","Please select quantity");
-    frmvalidator.addValidation("order_line_delivery_date[]","req","Please select date of delivery");
-    frmvalidator.addValidation("order_line_selling_price[]","req","Please select selling price");
-    frmvalidator.addValidation("item_VAT[]","req","Please enter Tax Percentage");
-
-    /**
-     * Projet Name : Dynamic Form Processing with PHP
-     * URL: http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP
-     *
-     * Licensed under the MIT license.
-     * http://www.opensource.org/licenses/mit-license.php
-     *
-     * Copyright 2013, Tech Stream
-     * http://techstream.org
-     */
-
-    /*function addRow(tableID) {
-        var table = document.getElementById(tableID);   //set an table object by selecting the element from the given param
-        var rowCount = table.rows.length;               //count the number of rows of table
-        //alert(rowCount);
-        var maxRowCount = 10;                           // set up the maximum number of row
-        var selectLocation = 2;                         // set up the location of select
-        if(rowCount < maxRowCount){						// limit the user from creating fields more than your limits
-            var row = table.insertRow(rowCount);        // insert a new row
-            var colCount = table.rows[0].cells.length;  // get the number of columns to limit the loop
-            for(var i=0; i<colCount; i++) {             // a loop to insert new cells and set up new ID for each cell and the select
-                var newCell = row.insertCell(i);        // insert a new cell
-                var rowIndexId = rowCount - 1;          // get the row index
-                newCell.id = "row-" + rowIndexId + "_col-" + i; // set up new ID
-                if (i == selectLocation) {              // find the select box column location
-                    var newStr = function(){            // run a function to create new id, find & replace old id
-                        var newID = "item_id_select_" + rowIndexId; //set up new id for select box
-                        var str = table.rows[1].cells[i].innerHTML.replace("item_id_select_0", newID); // replace the old id in innerHTML
-                        return str;
-                    };
-                    newCell.innerHTML = newStr();       // write the updated innerHTML to the column containing the select
-                }
-                else {
-                    newCell.innerHTML = table.rows[1].cells[i].innerHTML; // if the column does not contain select box, duplicate the previous one
-                }
-            }
-        }else{
-            // display message if reaching the maximum number of order lines
-            alert("Maximum order line per order is " + maxRowCount + "!");
-
+            //include the convert template
+            include('create_order_convert_template.html');
         }
-    }
-
-    /!**
-     function: deleteRow(tableID)
-     purpose: delete rows that have checked checkboxes and update ids for elements correspondingly
-     inputs: tableID
-     outputs: none
-     *!/
-    function deleteRow(tableID) {
-
-        //set an table object by selecting the element from the given param
-        var table = document.getElementById(tableID);
-        //count the number of rows of table
-        var rowCount = table.rows.length;
-
-        // a loop to catch the selected checkboxes and remove the row correspondingly
-        for(var i=0; i<rowCount; i++) {
-            // set a row object for the current row in the loop
-            var row = table.rows[i];
-            // get the checkbox's value
-            var chkBox = row.cells[0].childNodes[0];
-            // remove the rows that have checked checkbox but do not remove all the row
-            if(null != chkBox && true == chkBox.checked) {
-                if(rowCount <= 1) { 						// limit the user from removing all the fields
-                    alert("Cannot Remove all the order lines.");
-                    break;
-                }
-                // delete the corresponding row
-                table.deleteRow(i);
-                rowCount--;
-                i--;
-            }
+        else
+        {
+            include('create_order_no_convert_template.html');
         }
-
-        // a loop to update the current lines' ids
-        for(var j=1; j<rowCount; j++) {
-            // get the maximum of number of columns
-            var colCount = table.rows[0].cells.length;
-            // set the new row index to match the array value
-            var rowIndexIdRemake = j -1;
-            // a loop to update ids
-            for(var m=0; m<colCount; m++) {
-                // get the old id
-                var oldCellId = table.rows[j].cells[m].id;
-                // if the column does not contain select box, update id of cell only
-                if (m!==2){
-                    table.rows[j].cells[m].id = "row-" + rowIndexIdRemake + "_col-" +m;
-                }
-                else {
-                    // update the cell id and select id
-                    table.rows[j].cells[m].id = "row-" + rowIndexIdRemake + "_col-" + m;
-                    // set new select id
-                    var selectNewId = "item_id_select_" + rowIndexIdRemake;
-                    // catch the old id
-                    var numberOfRow = oldCellId.slice(4,5);
-                    var selectOldId = "item_id_select_" + numberOfRow;
-                    // change the id of the select
-                    $("#" + selectOldId).attr("id",selectNewId);
-                }
-            }
-        }
-    }*/
-
-    function myFunction() {
-        document.getElementsByTagName("H1")[0].setAttribute("class", "democlass");
-    }
-
-</script>
+    ?>
 </body>
 </html>

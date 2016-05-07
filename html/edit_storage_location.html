@@ -1,0 +1,184 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
+  <script src="../js/jquery-2.1.4.min.js"></script>
+  <script src="../js/bootstrap.min.js"></script>
+  <script src="../js/customScript.js"></script>
+  <script src="../lib/angular/angular.min.js"></script>
+  <script src="../js/gen_validatorv4.js"></script>
+<!--  <script src="../js/orderLineCalculate.js"></script>
+    <script src="../js/displayWarehouseDetails.js"></script>-->
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+	
+	<?php //get the desired storage location by item_id in URL
+            if (isset($_GET['storage_location_id'])) {
+
+                //get the param in URL of item_id
+                $edit_storage_location_id = $_GET['storage_location_id'];
+
+                //set up the sql to select the record that has the corresponding item_id
+                $sql = "SELECT *, warehouse.warehouse_name FROM storage_location JOIN warehouse ON storage_location.storage_location_warehouse_id = warehouse.warehouse_id WHERE storage_location_id = '$edit_storage_location_id'";
+
+                //run the query to get the storage location
+                $query = mysqli_query($db,$sql) or die ("Error: Cannot edit storage location");
+
+                //fetch the result to an array
+                $row = mysqli_fetch_assoc($query);
+                
+                //store the data to variables
+				$storage_location_shelf = $row['storage_location_shelf'];
+                $storage_location_row = $row['storage_location_row'];
+                $storage_location_column = $row['storage_location_column'];
+                $storage_location_condition = $row['storage_location_condition'];
+                $warehouse_name = $row['warehouse_name'];
+            }
+            else
+            {
+                //if not GET method found, declare all the variables as empty to prevent error
+                $item_image = "";
+				$storage_location_shelf = "";
+                $storage_location_row = "";
+                $storage_location_column = "";
+                $storage_location_condition = "";
+                $warehouse_name = "";
+            }
+        ?>
+	
+    <div class="row">
+        <form role="form" name="myForm" id="myForm" action="../php/edit_storage_location.php" method="post">
+            <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
+
+                    <h2 class="text-center">Storage Location</h2>
+                <!-- define the note for * symbol-->
+                <div class="well well-sm col-md-4 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                <!-- display the order ID -->
+                <div class="well well-sm col-md-4 text-center pull-right"><strong>Storage Location ID: </strong><input name="storage_location_id" class="readonly" readonly value="<?php echo $edit_storage_location_id; ?>"></div>
+                <!--clear floating display style so that all input can display vertically-->
+                <div class="clearfix"></div>
+                <div class="form-group">
+
+                    <label>Warehouse</label>
+                    <div class="input-group">
+						<input id="warehouse_id_name" class="form-control" value="<?php echo $row['warehouse_id'].' - '.$row['warehouse_name'];?>" readonly>
+
+                        <!--store the value to a hidden input because disabled select is ignored during form posting-->
+                        <input name="warehouse_id" hidden value="<?php echo $row['warehouse_id'];?>">
+
+                        <!--run the script to load corresponding warehouse details based on the change of warehouse name-->
+                        <script>
+                            displayWarehouseDetails("<?php echo $row['warehouse_id'];?>");
+                        </script>
+					
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    </div>
+                </div>
+                <!--Display warehouse information as user select from select input above-->
+                <!--Display warehouse information as user select from select input above-->
+                <div class="form-group" id="warehouse_detail_display">
+                    <p hidden>[Warehouse Description]</p>
+                </div>
+
+                <div class="form-group ">
+                        <div class="form-group col-sm-12">
+                            <label>Storage Shelf</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_storage_shelf_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="storage_location_shelf" placeholder="Storage Location Shelf" value="<?php echo $storage_location_shelf; ?>" >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group col-sm-12">
+                            <label>Storage Row</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_storage_row_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="storage_location_row" placeholder="Storage Location Row" value="<?php echo $storage_location_row; ?>" >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group col-sm-12">
+                            <label>Storage Column</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_storage_column_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="storage_location_column" placeholder="Storage Location Column" value="<?php echo $storage_location_column; ?>" >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group col-sm-12">
+                            <label>Storage Condition</label>
+                            <div class="input-group">
+								<!--run script to set the default option of select box to be the corresponding status of order-->
+								<script>
+									$(document).ready(function() {
+										$("#storage_condition").val("<?php echo $row['storage_location_condition'];?>");
+									});
+								</script>
+							
+                                <select id="storage_condition" name="storage_condition" class="form-control">
+                                    <option selected disabled>--Please Select Storage Condition--</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Broken">Broken</option>
+                                    <option value="Unusable">Unusable</option>
+                                </select>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+                        
+                
+                <div class="clearfix"></div>
+                
+                <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default pull-right">
+                
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="footer"></div>
+
+<!--script to validate inputs
+Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+<script language="JavaScript" type="text/javascript">
+    //You should create the validator only after the definition of the HTML form
+
+    var frmvalidator  = new Validator("myForm");
+    frmvalidator.EnableOnPageErrorDisplaySingleBox();
+    frmvalidator.EnableMsgsTogether();
+
+    frmvalidator.addValidation("order_line_item_quantity","req","Please select quantity");
+    frmvalidator.addValidation("order_line_delivery_date","req","Please select date of delivery");
+    frmvalidator.addValidation("order_line_selling_price","req","Please select selling price");
+    frmvalidator.addValidation("item_VAT","req","Please enter Tax Percentage");
+
+    function myFunction() {
+        document.getElementsByTagName("H1")[0].setAttribute("class", "democlass");
+    }
+
+</script>
+</body>
+</html>

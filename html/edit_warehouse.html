@@ -1,0 +1,319 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+
+    //get the desired warehouse by warehouse_id in URL
+    if (isset($_GET['warehouse_id'])) {
+
+        //get the param in URL of warehouse_id
+        $edit_warehouse_id = $_GET['warehouse_id'];
+
+        //check if the id is taken correctly
+        //echo $edit_warehouse_id;
+
+        //set up the sql to select the record that has the corresponding warehouse_id
+        $sql_warehouse = "SELECT *, staff.staff_name FROM warehouse JOIN staff ON warehouse.warehouse_supervisor_id = staff.staff_id WHERE warehouse_id = '$edit_warehouse_id'";
+
+        //run the query to get the warehouse
+        $query_warehouse = mysqli_query($db,$sql_warehouse) or die ("Error: Cannot edit warehouse");
+
+        //fetch the result to an array
+        $row_warehouse = mysqli_fetch_assoc($query_warehouse);
+
+        //store the data to variables
+        $warehouse_name = $row_warehouse['warehouse_name'];
+        $staff_id = $row_warehouse['warehouse_supervisor_id'];
+        $staff_name = $row_warehouse['staff_name'];
+        $warehouse_location = $row_warehouse['warehouse_location'];
+        $warehouse_capacity = $row_warehouse['warehouse_capacity'];
+        $warehouse_item_category = $row_warehouse['warehouse_item_category'];
+    }
+    else
+    {
+        //if not GET method found, declare all the variables as empty to prevent error
+        $warehouse_name = "";
+        $staff_id = "";
+        $staff_name = "";
+        $warehouse_location = "";
+        $warehouse_capacity = "";
+        $warehouse_item_category = "";
+    }
+    //split the string location address based on semi-colon
+    //declare 3 variables as blank to prevent no data from the string
+    $warehouse_location_street = "";
+    $warehouse_location_city = "";
+    $warehouse_location_country = "";
+
+    //split the string and assign to the variables
+    if ($warehouse_location != ""){
+        list($warehouse_location_street, $warehouse_location_city, $warehouse_location_country) = explode(";", $warehouse_location);
+       }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/countries.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script>
+        // set the billing and shipping country
+        $(window).load(setTimeout(function(){
+            populateCountries("country", "city");
+            $("#country").val("<?php echo $warehouse_location_country;?>");
+            console.log("<?php echo $warehouse_location_country; ?>");
+        }, 30));
+
+        // set the billing and shipping city after 50 milliseconds delay
+        $(window).load(setTimeout(function(){
+            populateStates("country", "city");
+            $("#city").val("<?php echo $warehouse_location_city; ?>");
+            console.log("<?php echo $warehouse_location_city; ?>");
+        }, 90));
+    </script>
+    <link rel="stylesheet" href="../css/progress.css">
+    <script type="text/javascript" src="../js/jquery-asPieProgress.js"></script>
+</head>
+<body>
+
+    <div id="header"></div>
+
+    <div class="container">
+
+        <div class="row">
+            <!--establish the form for warehouse, the form will perform validation, after that, search function -->
+            <form role="form" name="myForm" id="myForm" action="../php/edit_warehouse.php" method="post">
+
+                <!--define the title of the form + the note for * symbol-->
+                    <h2 class="text-center">Warehouse</h2>
+                    <div class="well well-sm col-sm-4 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+
+                    <div class="clearfix"></div>
+
+                    <!--load the warehouse details-->
+                    <!--draw a outside border + display form legend-->
+                    <fieldset>
+                        <legend>Basic Information</legend>
+
+                        <!--display the fields-->
+                        <!--display warehouse id-->
+                        <div class="form-group col-sm-3">
+                            <label>Warehouse ID</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_id_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="warehouse_id" value="<?php echo $edit_warehouse_id;?>" readonly >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <!--display warehouse name-->
+                        <div class="form-group col-sm-3">
+                            <label>Warehouse Name</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_name_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="warehouse_name" value="<?php echo $warehouse_name;?>"  >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <!--display warehouse responsible supervisor-->
+                        <div class="form-group col-sm-6 pull-right">
+                            <label>Supervisor</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_staff_id_errorloc" class="error"></div>
+                            <div class="input-group">
+
+                                <!--run script to set the default option of select box to be the corresponding status of customer-->
+                                <script>
+                                    $(document).ready(function() {
+                                        $("#staff_id").val("<?php echo $staff_id;?>");
+                                    });
+                                </script>
+
+                                <!--select staff on the list-->
+                                <select id="staff_id" name="staff_id" class="form-control">
+                                    <option value="0" selected disabled>--Please Select Warehouse Supervisor--</option>
+                                    <?php
+                                        //get the desired staff by staff_id in URL
+
+                                        //set up the sql to select the record that has the corresponding staff_id
+                                        $sql_staff_select = "SELECT staff.staff_name,staff.staff_id FROM staff WHERE staff_end_date IS NULL";
+
+                                        //run the query to get the staff
+                                        $query_staff_select = mysqli_query($db,$sql_staff_select);
+
+                                        //fetch the result to an array
+                                        while($row_staff_select = mysqli_fetch_assoc($query_staff_select)) {
+                                            echo "<option value=".$row_staff_select["staff_id"].">".$row_staff_select["staff_name"]."</option>";
+                                    }
+                                    ?>
+                                </select>
+
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <!--display warehouse location-->
+                        <div class="form-group">
+                            <label>Warehouse Location</label>
+                            <!--display warehouse location street-->
+                            <div class="form-group col-sm-12">
+                                <label>Street</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_warehouse_location_street_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" style="min-width:100%" class="form-control" name="warehouse_location_street" value="<?php echo $warehouse_location_street;?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display warehouse location country-->
+                            <div class="form-group col-sm-4">
+                                <label>Country</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_warehouse_location_country_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <select id="country" class="form-control" style="min-width:100%" name="warehouse_location_country"></select>
+                                    <!--<input type="text" style="min-width:100%" class="form-control" name="warehouse_billing_location_country" placeholder="Country" > -->
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display warehouse location city-->
+                            <div class="form-group col-sm-6 pull-right">
+                                <label>City</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_warehouse_location_city_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <select id="city" class="form-control" style="min-width:100%" name="warehouse_location_city" ></select>
+                                    <!--<input type="text" style="min-width:90%" class="form-control" name="warehouse_billing_location_city" placeholder="City" >-->
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-sm-4" style="margin: 0  -15px">
+                        <div class="form-group col-sm-12">
+                            <label>Warehouse Capacity</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_capacity_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="warehouse_capacity" value="<?php echo $warehouse_capacity;?>" >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-12 ">
+                            <label>Warehouse Item Category</label>
+                            <?php //split the string item category based on semi-colon
+
+                                //declare 3 variables as blank to prevent no data from the string
+
+                                //split the string and assign to the variables
+                                if ($warehouse_item_category != ""){
+                                    $warehouse_item_category_record = explode(";", $warehouse_item_category);
+                                }
+                                //echo $warehouse_item_category_record;
+                            ?>
+                            <!--display the error line of code-->
+                            <div id="myForm_warehouse_item_category_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <?php
+                                    //get the desired staff by staff_id in URL
+
+                                    //set up the sql to select the record that has the corresponding staff_id
+                                    $sql_item_cat_select = "SELECT item_category.item_category_id,item_category.item_category_name FROM item_category";
+
+                                    //run the query to get the staff
+                                    $query_item_cat_select = mysqli_query($db,$sql_item_cat_select);
+
+                                    //fetch the result to an array
+                                    while($row_item_cat_select = mysqli_fetch_assoc($query_item_cat_select)) {
+                                ?>
+                                <div class='checkbox'>
+                                    <input type='checkbox'  name='warehouse_item_category[]' value="<?php echo $row_item_cat_select['item_category_id'];?>"
+                                    <?php
+                                        for ($i = 0; $i < count($warehouse_item_category_record ); $i++){
+                                            if ($row_item_cat_select['item_category_id'] == $warehouse_item_category_record[$i]) {
+                                                echo ' checked';
+                                            }
+                                        }
+                                    ?>
+                                    <?php
+                                        echo ">".$row_item_cat_select["item_category_name"]."</div>";
+                                        } ?>
+                            </div>
+
+                        </div>
+                        </div>
+                        <div class="form-group col-sm-4 " style="float: right !important;">
+                            <!--the div which has class that defy the progress bar. Note: data goal is the percentage of the progress bar -->
+                            <div class="pie_progress" role="progressbar" data-goal="80" style="height: 180px !important; width: 180px !important;">
+                                <!--Note: this span is important to display the percentage number-->
+                                <span class="pie_progress__number" style="font-size: 30px !important; padding-bottom: 10% !important;"></span>
+                                <!--display the label of the progress bar-->
+                                <div class="pie_progress__label" style="padding-bottom: 10% !important;">Current Capacity</div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!--submit button-->
+                    <input type="submit" name="submit" id="submit" value="Update" class="btn btn-default pull-right">
+            </form>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <!--script to validate inputs
+    Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+    <script language="JavaScript" type="text/javascript">
+    //You should create the validator only after the definition of the HTML form
+    var frmvalidator  = new Validator("myForm");
+    frmvalidator.EnableOnPageErrorDisplay();
+    frmvalidator.EnableMsgsTogether();
+
+    frmvalidator.addValidation("warehouse_name","req","warehouse Name is required");
+
+    frmvalidator.addValidation("warehouse_location_address_street","req","Location is required");
+    frmvalidator.addValidation("warehouse_location_address_city","req","Location is required");
+    frmvalidator.addValidation("warehouse_location_address_country","req","Location is required");
+
+    frmvalidator.addValidation("staff_id","req","Supervisor is required");
+
+    frmvalidator.addValidation("warehouse_capacity_term","req","Warehouse Capacity is required");
+    frmvalidator.addValidation("warehouse_capacity_term","num","Warehouse Capacity is number only");
+    </script>
+
+    <script>
+    $(window).ready(function($){
+        // Progress bar function
+        $('.pie_progress').asPieProgress({
+            namespace: 'pie_progress',
+            min: 0,
+            max: 100,
+            speed: 30
+        });
+        // Event handler, bar will be load when the warehouse tab is switched
+        $(window).on('load', function(){
+            $('.pie_progress').asPieProgress('start');
+        });
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<?php
+//include the definition of database
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/partialsScript.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/countries.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script>
+        // set the default country to Vietnam and city to Ho Chi Minh city
+        $(window).load(setTimeout(function(){
+            $("#billingCountry").prop("selectedIndex", config.selectedIndex.country);
+            $("#shippingCountry").prop("selectedIndex", config.selectedIndex.country);
+        }, 30));
+
+        $(window).load(setTimeout(function (){
+            populateStates("billingCountry", "billingCity");
+            populateStates("shippingCountry", "shippingCity");
+            $("#billingCity").prop("selectedIndex", config.selectedIndex.city);
+            $("#shippingCity").prop("selectedIndex", config.selectedIndex.city);
+        }, 50));
+    </script>
+    
+</head>
+<body>
+
+    <div id="header"></div>
+
+    <div class="container">
+
+        <div class="row">
+            <!--establish the form for customer, the form will perform validation, after that, search function -->
+            <form role="form" name="myForm" id="myForm" action="../php/create_user.php" method="post">
+
+                <!--define the title of the form + the note for * symbol-->
+                    <h2 class="text-center">User</h2>
+                    <div class="well well-sm col-sm-2 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                    <div class="clearfix"></div>
+
+                    <!--draw a outside border + display form legend-->
+                    <fieldset>
+                        <legend>Basic Information</legend>
+
+                        <!--display the fields-->
+                        <!--display customer name-->
+                        <div class="form-group col-sm-4">
+                            <label>User Name</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_user_name_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="user_name" placeholder="User Name"  >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+
+                        </div>
+
+                        <!--display customer tax code-->
+                        <div class="form-group col-sm-4">
+                            <label>Password</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_user_password_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="user_password" placeholder="User Password" >
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+
+                        </div>
+
+                        <!--display customer accountable salesperson + responsible supervisor-->
+                        <div class="form-group col-sm-4 pull-right">
+                            <label>Staff Name</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_staff_id_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <!--select staff on the list-->
+                                <select id="staff_id_select" name="staff_id" class="form-control">
+                                    <option value="0" selected disabled>--Please select staff--</option>
+                                    <?php
+                                        //get the desired staff by staff_id in URL
+
+                                        //set up the sql to select the record that has the corresponding staff_id
+                                        $sql_staff_select = "SELECT staff.staff_name,staff.staff_id FROM staff";
+
+                                        //run the query to get the staff
+                                        $query_staff_select = mysqli_query($db,$sql_staff_select);
+
+                                        //fetch the result to an array
+                                        while($row_staff_select = mysqli_fetch_assoc($query_staff_select)) {
+                                            echo "<option value=".$row_staff_select["staff_id"].">".$row_staff_select["staff_name"]."</option>";
+                                        }
+                                    ?>
+                                </select>
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <br>
+
+                    <!--display role-->
+    <div class="form-group col-sm-4 pull-left">
+    <label>Role</label>
+<!--display the error line of code-->
+    <div id="myForm_role_id_errorloc" class="error"></div>
+		<div class="input-group">	
+		<select id="role_id" name="role_id" class="form-control">>
+				<option value="0" selected disabled>--Please select role--</option>
+				<option value="1">CEO</option>
+				<option value="2">Sales</option>
+				<option value="3">Accounting</option>
+				<option value="4">Warehouse</option>
+			</select>
+		<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+    </div>
+	</div>
+
+    <div class="clearfix"></div>
+						<!--submit button-->
+    <input type="submit" name="submit" id="submit" value="Create" class="btn btn-default pull-right">
+</div>
+</div>
+            </form>
+
+    <div id="footer"></div>
+
+    <!--script to validate inputs
+    Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+    <script language="JavaScript" type="text/javascript">
+        //You should create the validator only after the definition of the HTML form
+        var frmvalidator  = new Validator("myForm");
+        frmvalidator.EnableOnPageErrorDisplay();
+        frmvalidator.EnableMsgsTogether();
+
+        frmvalidator.addValidation("customer_name","req","Customer Name is required");
+        frmvalidator.addValidation("customer_long_name","req","Customer Long Name is required");
+
+        frmvalidator.addValidation("customer_billing_address_street","req","Billing Address is required");
+        frmvalidator.addValidation("customer_billing_address_city","req","Billing Address is required");
+        frmvalidator.addValidation("customer_billing_address_country","req","Billing Address is required");
+
+        frmvalidator.addValidation("customer_tax_code","req","Tax Code is required");
+        frmvalidator.addValidation("customer_tax_code","num","Tax Code is numeric only");
+
+        frmvalidator.addValidation("staff_id","req","Sale Person Accountable is required");
+
+        frmvalidator.addValidation("customer_contact_person_name","req","Contact person name is required");
+
+        frmvalidator.addValidation("customer_contact_person_phone_number","req","Contact person phone number is required");
+        frmvalidator.addValidation("customer_contact_person_phone_number","phone","Contact person phone number is numeric only");
+
+        frmvalidator.addValidation("customer_contact_person_email","req","Contact person email is required");
+        frmvalidator.addValidation("customer_contact_person_email","email","Contact person email is required");
+
+        frmvalidator.addValidation("customer_shipping_address_street","req","Shipping Address Street is required");
+        frmvalidator.addValidation("customer_shipping_address_city","req","Shipping Address City is required");
+        frmvalidator.addValidation("customer_shipping_address_country","req","Shipping Address Country is required");
+
+        frmvalidator.addValidation("customer_credit_limit","req","Credit Limit is required");
+        frmvalidator.addValidation("customer_credit_limit","num","Credit Limit is required");
+
+        frmvalidator.addValidation("customer_payment_term","req","Payment Term is required");
+
+    </script>
+
+</body>
+</html>

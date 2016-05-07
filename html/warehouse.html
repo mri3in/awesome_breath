@@ -1,90 +1,88 @@
+<?php
+    //include the definition of database
+    include('../config.php');
+?>
+
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel="stylesheet" href="../css/progress.css">
+        <script type="text/javascript" src="../js/jquery-asPieProgress.js"></script>
+        <script src="../js/customScript.js"></script>
+        <style type="text/css">
+            .pie_progress {
+                width: 200px;
+                margin: 10px auto;
+            }
+        </style>
+    </head>
+
     <body>
-        
-<div class="container">
-    <h1>Warehouse</h1>
-    <div class="col-lg-12">
-    <a class="btn btn-default" href="newwarehouse.html">Create New Warehouse</a>
-    <button class="btn btn-danger">Delete Item</button>
-    </div>
-   <div class="col-lg-12">
-       <h5>Search</h5>
-        <input type="text" class="form-control" style="width:auto" placeholder="Search for">
-        <select class="form-control" style="width:auto; margin:2px 0px">
-            <option>warehouse type</option>
-            <option>Storage location</option>
-            <option>Description</option>
-        </select>
-    </div>
-    <div class="container">
-            <table class="table-striped">
-              <tr>
-                <th></th>
-                <th>warehouse</th>
-                <th>warehouse type</th>
-                <th>storage location id</th>
-                <th>capacity</th>
-                <th>Description</th>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td> <span class="glyphicon glyphicon-menu-down"></span>WH01</td>
-                <td>chemistry</td>
-                <td></td>
-                <td>199/300</td>
-                <td></td>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td></td>
-                <td></td>
-                <td>WH010301</td>
-                <td>6/8</td>
-                <td>washing powder</td>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td></td>
-                <td></td>
-                <td>WH010302</td>
-                <td>2/8</td>
-                <td>washing powder</td>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td></td>
-                <td></td>
-                <td>WH010303</td>
-                <td>0/8</td>
-                <td>on maintainance</td>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td> <span class="glyphicon glyphicon-menu-down"></span>WH02</td>
-                <td>machinery</td>
-                <td></td>
-                <td>12/100</td>
-                <td></td>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td></td>
-                <td></td>
-                <td>WH020101</td>
-                <td>1/4</td>
-                <td>washing machine</td>
-              </tr>
-              <tr id="link">
-                <td><input type="checkbox"></td>
-                <td></td>
-                <td></td>
-                <td>WH020102</td>
-                <td>0/4</td>
-                <td></td>
-              </tr>
+        <div class="container">
+            <h1>Warehouse</h1>
+            <table>
+                <tr>
+                    <!--create button for creating new warehouse | delete warehouse-->
+                    <td>
+                        <a class="btn btn-default" data-toggle="tooltip" title="Create New Warehouse" href="create_warehouse.html">
+                            <span class="fa fa-plus" ></span></a>
+                        <button class="btn btn-danger" name="delete" value="Delete"  onClick="" ><i class="fa fa-trash-o" data-toggle="tooltip" title="Delete Warehouse"></i></button>
+                    </td>
+                </tr>
             </table>
-    </div>
-</div>
+
+            <?php
+                //set up the sql to select the record that has the corresponding warehouse_id
+                $sql_warehouse = "SELECT *, staff.staff_name FROM warehouse
+                                    JOIN staff
+                                        ON warehouse.warehouse_supervisor_id = staff.staff_id";
+
+                //run the query to get the warehouse
+                $query_warehouse = mysqli_query($db,$sql_warehouse) or die ("Error: Cannot edit warehouse");
+
+                //fetch the result to an array
+                while ($row_warehouse = mysqli_fetch_assoc($query_warehouse)) {
+                    $item_category_array = explode(";",$row_warehouse['warehouse_item_category']);
+
+            ?>
+            <div class="row" style="margin-top: 40px; margin-bottom: 40px">
+                <div class="col-sm-6">
+                    <!--reference link when progress pie bar is clicked-->
+                    <!--the div which has class that defy the progress bar. Note: data goal is the percentage of the progress bar -->
+                    <div class="pie_progress " role="progressbar" aria-valuemax="<?php echo $row_warehouse['warehouse_capacity'];?>" data-goal="<?php echo $row_warehouse['warehouse_current_capacity'];?>">
+                        <!--Note: this span is important to display the percentage number-->
+                        <span class="pie_progress__number"></span>
+                        <!--display the label of the progress bar-->
+                        <div class="pie_progress__label"><?php echo $row_warehouse['warehouse_name'];?></div>
+                    </div>
+
+                </div>
+                <div class="col-sm-6">
+                    <legend>Warehouse <?php echo ' '.$row_warehouse['warehouse_id'];?> <a class="btn btn-success" data-toggle="tooltip" title="Edit Warehouse" href="edit_warehouse.html?warehouse_id=<?php echo $row_warehouse['warehouse_id'];?>">
+                        <span class="fa fa-pencil-square-o" ></span></a></legend>
+                    <h5>Supervisor: <?php echo ' '.$row_warehouse['staff_name'];?></h5>
+                    <h5>Warehouse Location: <?php echo ' '.$row_warehouse['warehouse_location'];?></h5>
+                    <h5>Warehouse Occupied Locations: <?php echo ' '.$row_warehouse['warehouse_capacity'];?></h5>
+                    <h5>Item Category:</h5>
+                    <ul>
+                        <?php
+                            for ($i = 0 ; $i < count($item_category_array); $i++){
+                        ?>
+                        <li>
+                            <?php
+                                $query_item_category = mysqli_query($db,"SELECT * FROM item_category WHERE item_category_id = '$item_category_array[$i]'");
+                                $result_item_category = mysqli_fetch_assoc($query_item_category);
+                                echo $result_item_category['item_category_name'];
+                            ?>
+                        </li>
+                        <?php } ?>
+                    </ul>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <script type="text/javascript">
+            $(window).ready(setTimeout(progressBar($),300));
+        </script>
     </body>
 </html>

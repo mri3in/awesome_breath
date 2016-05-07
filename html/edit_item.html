@@ -1,0 +1,449 @@
+<?php
+//include the definition of database
+include('../config.php');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/currencyFormat.js"></script>
+    
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="container">
+	
+	<?php //get the desired item by item_id in URL
+            if (isset($_GET['item_id'])) {
+
+                //get the param in URL of item_id
+                $edit_item_id = $_GET['item_id'];
+
+                //check if the id is taken correctly
+                //echo $edit_item_id;
+
+                //set up the sql to select the record that has the corresponding item_id
+                $sql = "SELECT *, item_category.item_category_name FROM item JOIN item_category ON item.item_category_id =item_category.item_category_id WHERE item_id = '$edit_item_id'";
+
+                //run the query to get the item
+                $query = mysqli_query($db,$sql) or die ("Error: Cannot edit item");
+
+                //fetch the result to an array
+                $row = mysqli_fetch_assoc($query);
+                
+                //store the data to variables
+				$item_image = $row['item_photo'];
+                $item_name = $row['item_name'];
+                $item_category = $row['item_category_id'];
+                $item_vendor = $row['item_vendor'];
+                $item_manufacturer = $row['item_manufacturer'];
+                $item_power = $row['item_power'];
+                $item_power_unit = $row['item_power_unit'];
+                $item_phase = $row['item_phase'];
+                $item_voltage_low = $row['item_voltage_low'];
+                $item_voltage_high = $row['item_voltage_high'];
+                $item_capacity = $row['item_capacity'];
+                $item_frequency = $row['item_frequency'];
+                $item_cost = $row['item_cost'];
+                $item_unit_price = $row['item_unit_price'];
+				$item_vat = $row['item_VAT'];
+				$item_area = $row['item_area'];
+				$item_quantity = $row['item_quantity'];
+				$item_unit_of_measurement = $row['item_unit_of_measurement'];
+				$item_diameter = $row['item_diameter'];
+				$item_description = $row['item_description'];
+				$item_expiry_period = $row['item_expiry_period'];
+            }
+            else
+            {
+                //if not GET method found, declare all the variables as empty to prevent error
+                $item_image = "";
+				$item_name = "";
+				$item_category = "";
+				$item_vendor = "";
+				$item_manufacturer = "";
+				$item_power = "";
+				$item_power_unit = "";
+				$item_phase = "";
+				$item_voltage_low = "";
+				$item_voltage_high = "";
+				$item_capacity = "";
+				$item_frequency = "";
+				$item_cost = "";
+				$item_unit_price = "";
+				$item_vat = "";
+				$item_area = "";
+				$item_quantity = "";
+				$item_unit_of_measurement = "";
+				$item_diameter = "";
+				$item_description = "";
+				$item_expiry_period = "";
+            }
+        ?>
+		
+    <div class="row">
+        <!--establish the form for item, the form will perform validation, after that, search function -->
+        <form role="form" name="myForm" id="myForm" action="../php/edit_item.php" method="post" enctype="multipart/form-data">
+
+            <!--define the title of the form + the note for * symbol-->
+                <h2 class="text-center">Item</h2>
+                <div class="well well-sm col-sm-12"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                <div class="clearfix"></div>
+
+                <!--draw a outside border + display form legend-->
+                <fieldset>
+                    <legend>Basic Information</legend>
+
+                    <!--display the fields-->
+                    <!--display item name-->
+                    <div class="form-group col-sm-6">
+                        <label>Item ID</label>
+                        <!--display the error line of code-->
+                        <div id="myForm_item_id_errorloc" class="error"></div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="item_id" placeholder="Item ID" value="<?php echo $edit_item_id; ?>" readonly>
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group col-sm-6">
+                        <label>Item Image</label>
+                        <!--display the error line of code-->
+                        <div id="myForm_item_image_errorloc" class="error"></div>
+                        <div class="input-group">
+                            <input type="file" class="form-control file" name="item_photo" placeholder="Select Picture" value="<?php echo $item_image; ?>">
+							<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group col-sm-6">
+                        <label>Item Name</label>
+                        <!--display the error line of code-->
+                        <div id="myForm_item_name_errorloc" class="error"></div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="item_name" placeholder="Item Name" value="<?php echo $item_name; ?>" >
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group col-sm-6">
+                        <label>Item Category</label>
+                        <!--display the error line of code-->
+                        <div id="myForm_item_category_errorloc" class="error"></div>
+                        <div class="input-group">
+                            
+							<!--select staff on the list-->
+                            <input id="item_category_name" class="form-control" value="<?php echo $row['item_category_name'];?>">
+                            <input id="item_category_id" name="item_category" class="form-control" value="<?php echo $row['item_category_id'];?>">
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group col-sm-6">
+                        <label>Item Vendor</label>
+                        <!--display the error line of code-->
+                        <div id="myForm_item_vendor_errorloc" class="error"></div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="item_vendor" placeholder="Item vendor" value="<?php echo $item_vendor; ?>" >
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group col-sm-6">
+                        <label>Item Manufaturer</label>
+                        <!--display the error line of code-->
+                        <div id="myForm_item_manufacturer_errorloc" class="error"></div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="item_manufacturer" placeholder="Item Manufacturer" value="<?php echo $item_manufacturer; ?>" >
+                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                        </div>
+                    </div>
+                    
+                    <br/><br/>
+                    <legend>Technical Information</legend>
+                    
+                    <!--display other details as tab + sub-tabs-->
+                <!--tab headers-->
+                <div>
+                    <ul class="nav nav-tabs">
+                        
+                        <li class="active"><a href="#power" data-toggle="tab">Power Details</a></li>
+                        <li><a href="#price" data-toggle="tab">Price Details</a></li>
+                        <li><a href="#storage" data-toggle="tab">Storage Details</a></li>
+                        <li><a href="#description" data-toggle="tab">Description</a></li>
+                        <li><a href="#expiry" data-toggle="tab">Expiry Date (for Chemical)</a></li>
+                    </ul>
+
+                    <!--sub-tab Power-->
+                    <div class="tab-content ">
+                        <div class="tab-pane active" id="power">
+                            
+                          <div class="form-group" style="margin-top: 15px !important;">    
+                            <!-- Item Power -->
+                            <div class="form-group col-sm-6">
+                                <label>Item Power</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_power_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_power" placeholder="Item Power" value="<?php echo $item_power; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Power Unit -->
+                            <div class="form-group col-sm-6">
+                                <label>Power Unit</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_power_unit_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_power_unit" placeholder="Item Power Unit" value="<?php echo $item_power_unit; ?>">
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Phase -->
+                            <div class="form-group col-sm-12">
+                                <label>Item Phase</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_phase_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_phase" placeholder="Item Phase" value="<?php echo $item_phase; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Voltage Low -->
+                            <div class="form-group col-sm-6">
+                                <label>Item Voltage Low</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_voltage_low_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_voltage_low" placeholder="Item Voltage Low" value="<?php echo $item_voltage_low; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Voltage High -->
+                            <div class="form-group col-sm-6">
+                                <label>Item Voltage High</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_voltage_high_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_voltage_high" placeholder="Item Voltage High" value="<?php echo $item_voltage_high; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Capacity -->
+                            <div class="form-group col-sm-12">
+                                <label>Item Capacity</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_capacity_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_capacity" placeholder="Item Capacity" value="<?php echo $item_capacity; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Frequency -->
+                            <div class="form-group col-sm-12">
+                                <label>Item Frequency</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_frequency_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_frequency" placeholder="Item Frequency" value="<?php echo $item_frequency; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                          
+                          </div><!--end tag form group-->
+                        </div> <!--end tag tab power-->
+
+                        <!--tab Price-->
+                        <div class="tab-pane" id="price">
+                          <div class="form-group" style="margin-top: 15px !important;">
+                            
+                            <div class="form-group col-sm-12">
+                                <label>Item Cost</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_cost_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" id="number1" class="form-control numbers" name="item_cost" placeholder="Item Cost" value="<?php echo $item_cost; ?>" readonly>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group col-sm-12">
+                                <label>Item Unit Price</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_unit_price_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" id="number2" class="form-control numbers" name="item_unit_price" placeholder="Item Unit Price" value="<?php echo $item_unit_price; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                                
+                            <div class="form-group col-sm-12">
+                                <label>Item VAT</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_vat_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_vat" placeholder="Item VAT" value="<?php echo $item_vat; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                          </div><!--end tag form group-->
+                        </div> <!--end tag tab price-->
+
+                        <!--tab Price-->
+                        <div class="tab-pane" id="storage">
+                          <div class="form-group" style="margin-top: 15px !important;">
+                            
+                            <div class="form-group col-sm-12">
+                                <label>Item Area</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_area_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_area" placeholder="Item Area" value="<?php echo $item_area; ?>">
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>      
+                            
+                            <div class="form-group col-sm-6">
+                                <label>Item Quantity</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_quantity_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_quantity" placeholder="Item Quantity" value="<?php echo $item_quantity; ?>" readonly >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group col-sm-6">
+                                <label>Unit of Measurement</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_unit_of_measurement_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_unit_of_measurement" placeholder="Unit of Measurement" value="<?php echo $item_unit_of_measurement; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group col-sm-12">
+                                <label>Item Diameter</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_diameter_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_diameter" placeholder="Item Diameter" value="<?php echo $item_diameter; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            
+                          </div><!--end tag form group-->
+                        </div> <!--end tag tab storage-->
+
+                        <!--tab Price-->
+                        <div class="tab-pane" id="description">
+                          <div class="form-group" style="margin-top: 15px !important;">
+                            <div class="form-group col-sm-12">
+                                <label>Item Description</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_description_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <textarea name="item_description" class="form-control" rows="2" ><?php echo $item_description; ?></textarea>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+  
+                          </div><!--end tag form group-->
+                        </div> <!--end tag tab description-->
+                        
+                        <!--tab Expiry-->
+                        <div class="tab-pane" id="expiry">
+                          <div class="form-group" style="margin-top: 15px !important;">
+                            
+                            <div class="form-group col-sm-12">
+                                <label>Item Expiry Period</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_item_expiry_period_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="item_expiry_period" placeholder="Item Expiry Period" value="<?php echo $item_expiry_period; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                                
+                          </div><!--end tag form group-->
+                        </div> <!--end tag tab expiry-->    
+                            
+                      </div><!--end tag tab tab-content-->    
+                </div><!--end tag tab header-->    
+
+                <div class="clearfix"></div>
+                  
+                </fieldset>
+
+                <!--submit button-->
+                <input type="submit" name="submit" id="submit" value="Update" class="btn btn-default pull-right">
+        </form>
+    </div>
+</div>
+
+<div id="footer"></div>
+
+<!--script to validate inputs
+Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+<script language="JavaScript" type="text/javascript">
+//You should create the validator only after the definition of the HTML form
+var frmvalidator  = new Validator("myForm");
+frmvalidator.EnableOnPageErrorDisplay();
+frmvalidator.EnableMsgsTogether();
+
+frmvalidator.addValidation("item_name","req","Customer Name is required");
+frmvalidator.addValidation("item_long_name","req","Customer Long Name is required");
+
+frmvalidator.addValidation("item_billing_address_street","req","Billing Address is required");
+frmvalidator.addValidation("item_billing_address_city","req","Billing Address is required");
+frmvalidator.addValidation("item_billing_address_country","req","Billing Address is required");
+
+frmvalidator.addValidation("item_tax_code","req","Tax Code is required");
+frmvalidator.addValidation("item_tax_code","num","Tax Code is numeric only");
+
+frmvalidator.addValidation("staff_id","req","Sale Person Accountable is required");
+
+frmvalidator.addValidation("item_contact_person_name","req","Contact person name is required");
+
+frmvalidator.addValidation("item_contact_person_phone_number","req","Contact person phone number is required");
+frmvalidator.addValidation("item_contact_person_phone_number","phone","Contact person phone number is numeric only");
+
+frmvalidator.addValidation("item_contact_person_email","req","Contact person email is required");
+frmvalidator.addValidation("item_contact_person_email","email","Contact person email is required");
+
+frmvalidator.addValidation("item_shipping_address_street","req","Shipping Address Street is required");
+frmvalidator.addValidation("item_shipping_address_city","req","Shipping Address City is required");
+frmvalidator.addValidation("item_shipping_address_country","req","Shipping Address Country is required");
+
+frmvalidator.addValidation("item_credit_limit","req","Credit Limit is required");
+frmvalidator.addValidation("item_credit_limit","num","Credit Limit is required");
+
+frmvalidator.addValidation("item_payment_term","req","Payment Term is required");
+
+</script>
+
+</body>
+</html>

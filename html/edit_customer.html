@@ -1,93 +1,159 @@
 <?php
-//include the definition of database
-include('../config.php');
+    //include the definition of database
+    include('../config.php');
+
+    //get the desired customer by customer_id in URL
+    if (isset($_GET['customer_id'])) {
+
+        //get the param in URL of customer_id
+        $edit_customer_id = $_GET['customer_id'];
+
+        //check if the id is taken correctly
+        //echo $edit_customer_id;
+
+        //set up the sql to select the record that has the corresponding customer_id
+        $sql = "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_id = '$edit_customer_id'";
+
+        //run the query to get the customer
+        $query = mysqli_query($db,$sql) or die ("Error: Cannot edit customer");
+
+        //fetch the result to an array
+        $row = mysqli_fetch_assoc($query);
+
+        //store the data to variables
+        $customer_name = $row['customer_name'];
+        $customer_long_name = $row['customer_long_name'];
+        $customer_shipping_address = $row['customer_shipping_address'];
+        $customer_billing_address = $row['customer_billing_address'];
+        $customer_contact_person_name = $row['customer_contact_person_name'];
+        $customer_contact_person_phone_number = $row['customer_contact_person_phone_number'];
+        $customer_tax_code = $row['customer_tax_code'];
+        $staff_id = $row['staff_id'];
+        $staff_name = $row['staff_name'];
+        $customer_phone_number = $row['customer_phone_number'];
+        $customer_credit_limit = $row['customer_credit_limit'];
+        $customer_current_credit = $row['customer_current_credit'];
+        $customer_payment_term = $row['customer_payment_term'];
+        $customer_contact_person_email = $row['customer_contact_person_email'];
+        $customer_status = $row['customer_status'];
+    }
+    else
+    {
+        //if not GET method found, declare all the variables as empty to prevent error
+        $customer_id = "";
+        $customer_name = "";
+        $customer_long_name = "";
+        $customer_shipping_address = "";
+        $customer_billing_address = "";
+        $customer_contact_person_name = "";
+        $customer_contact_person_phone_number = "";
+        $customer_tax_code = "";
+        $staff_id = "";
+        $staff_name = "";
+        $customer_current_credit = "";
+        $customer_credit_limit = "";
+        $customer_payment_term = "";
+        $customer_contact_person_email = "";
+        $customer_status = "";
+    }
+    //split the string billing address based on semi-colon
+    //declare 3 variables as blank to prevent no data from the string
+    $customer_billing_address_street = "";
+    $customer_billing_address_city = "";
+    $customer_billing_address_country = "";
+
+    //split the string and assign to the variables
+    if ($customer_billing_address != ""){
+        list($customer_billing_address_street, $customer_billing_address_city, $customer_billing_address_country) = explode(";", $customer_billing_address);
+    }
+    //split the string shipping address based on semi-colon
+    //declare 3 variables as blank to prevent no data from the string
+    $customer_shipping_address_street = "";
+    $customer_shipping_address_city = "";
+    $customer_shipping_address_country = "";
+
+    //split the string and assign to the variables
+    if ($customer_shipping_address != ""){
+        list($customer_shipping_address_street, $customer_shipping_address_city, $customer_shipping_address_country) = explode(";", $customer_shipping_address);
+    }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../css/bootstrap.min.css">
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">  
-  <script src="../js/jquery-2.1.4.min.js"></script>
-  <script src="../js/bootstrap.min.js"></script>
-  <script src="../js/script.js"></script>
-  <script src="../lib/angular/angular.min.js"></script>
-  <script src="../js/controllers.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <script src="../js/jquery-2.1.4.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/partialsScript.js"></script>
+    <script src="../lib/angular/angular.min.js"></script>
+    <script src="../js/gen_validatorv4.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script src="../js/countries.js"></script>
+    <script>
+        // set the billing and shipping country
+        $(window).load(setTimeout(function(){
+            populateCountries("customer_billing_address_country", "customer_billing_address_city");
+            populateCountries("customer_shipping_address_country", "customer_shipping_address_city");
+            $("#customer_billing_address_country").val("<?php echo $customer_billing_address_country;?>");
+            console.log("<?php echo $customer_billing_address_country; ?>");
+            $("#customer_shipping_address_country").val("<?php echo $customer_shipping_address_country; ?>");
+            $("#customer_payment_term").val("<?php echo $customer_payment_term; ?>")
+        }, 30));
 
+        // set the billing and shipping city after 50 milliseconds delay
+        $(window).load(setTimeout(function(){
+            populateStates("customer_billing_address_country", "customer_billing_address_city");
+            populateStates("customer_shipping_address_country", "customer_shipping_address_city");
+            $("#customer_billing_address_city").val("<?php echo $customer_billing_address_city; ?>");
+            console.log("<?php echo $customer_billing_address_city; ?>");
+            $("#customer_shipping_address_city").val("<?php echo $customer_shipping_address_city; ?>");
+        }, 90));
+    </script>
 </head>
 <body>
 
     <div id="header"></div>
 
     <div class="container">
-        <?php //get the desired customer by customer_id in URL
-            if (isset($_GET['customer_id'])) {
-
-                //get the param in URL of customer_id
-                $edit_customer_id = $_GET['customer_id'];
-
-                //check if the id is taken correctly
-                //echo $edit_customer_id;
-
-                //set up the sql to select the record that has the corresponding customer_id
-                $sql = "SELECT *, staff.staff_name FROM customer JOIN staff ON customer.staff_id = staff.staff_id WHERE customer_id = '$edit_customer_id'";
-
-                //run the query to get the customer
-                $query = mysqli_query($db,$sql) or die ("Error: Cannot edit customer");
-
-                //fetch the result to an array
-                $row = mysqli_fetch_assoc($query);
-                
-                //store the data to variables
-                $customer_name = $row['customer_name'];
-                $customer_long_name = $row['customer_long_name'];
-                $customer_shipping_address = $row['customer_shipping_address'];
-                $customer_billing_address = $row['customer_billing_address'];
-                $customer_contact_person_name = $row['customer_contact_person_name'];
-                $customer_contact_person_phone_number = $row['customer_contact_person_phone_number'];
-                $customer_tax_code = $row['customer_tax_code'];
-                $staff_id = $row['staff_id'];
-                $staff_name = $row['staff_name'];
-                //$staff_supervisor_id = $row['staff_supervisor_id'];
-                $customer_credit_limit = $row['customer_credit_limit'];
-                $customer_payment_term = $row['customer_payment_term'];
-                $customer_contact_person_email = $row['customer_contact_person_email'];
-                $customer_status = $row['customer_status'];
-            }
-            else
-            {
-                //if not GET method found, declare all the variables as empty to prevent error
-                $customer_id = "";
-                $customer_name = "";
-                $customer_long_name = "";
-                $customer_shipping_address = ""; 
-                $customer_billing_address = ""; 
-                $customer_contact_person_name = ""; 
-                $customer_contact_person_phone_number = ""; 
-                $customer_tax_code = ""; 
-                $staff_id = "";
-                $staff_name = "";
-                //$staff_supervisor_id = "";
-                $customer_credit_limit = ""; 
-                $customer_payment_term = "";
-                $customer_contact_person_email = ""; 
-                $customer_status = "";
-            }
-        ?>
-
         <div class="row">
             <!--establish the form for customer, the form will perform validation, after that, search function -->
-            <form role="form" name="myForm" action="../php/edit_customer.php" onsubmit="return validateForm()" method="post">
+            <form role="form" name="myForm" id="myForm" action="../php/edit_customer.php" method="post">
 
                 <!--define the title of the form + the note for * symbol-->
-                <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
                     <h2 class="text-center">Customer</h2>
-                    <div class="well well-sm"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
+                    <div class="well well-sm col-sm-2 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
 
+
+                    <!--display customer status-->
+                    <div class="form-group col-md-4 pull-right">
+                        <label class="col-md-5">Customer Status</label>
+                        <div class="col-md-7">
+                            <!--run script to set the default option of select box to be the corresponding status of customer-->
+                            <script>
+                                $(document).ready(function() {
+                                    $("#customer_status_select").val("<?php echo $customer_status;?>");
+                                    //alert("<?php echo $customer_status;?>")
+                                });
+                            </script>
+
+                            <!--set up the status of customer -->
+                            <select id="customer_status_select" name="customer_status" class="form-control">
+                                <option name="customer_status_none" value="None"> Please select a status</option>
+                                <option name="customer_status_active" value="Active">Active</option>
+                                <option name="customer_status_suspended" value="Suspended">Suspended</option>
+                                <option name="customer_status_deleted" value="Deleted">Deleted</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
                     <!--draw a outside border + display form legend-->
                     <fieldset>
                         <legend>Basic Information</legend>
@@ -95,24 +161,28 @@ include('../config.php');
                         <!--hide the customer_id so user cannot edit it but the value will be passed on submitting the form-->
                         <div class="form-group">
                             <div class="input-group">
-                                <input type="hidden" class="form-control" name="customer_id" value="<?php echo $edit_customer_id; ?>" required>
+                                <input type="hidden" class="form-control" name="customer_id" value="<?php echo $edit_customer_id; ?>" >
                             </div>
                         </div>
 
                         <!--display the required fields-->
                         <!--display customer name-->
-                        <div class="form-group">
+                        <div class="form-group col-sm-4">
                             <label>Customer Name</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_customer_name_errorloc" class="error"></div>
                             <div class="input-group">
-                                <input type="text" class="form-control" name="customer_name" placeholder="Customer Name" value= "<?php echo $customer_name; ?>"  required>
+                                <input type="text" class="form-control" name="customer_name" placeholder="Customer Name" value= "<?php echo $customer_name; ?>"  >
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group col-sm-8">
                             <label>Customer Long Name</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_customer_long_name_errorloc" class="error"></div>
                             <div class="input-group">
-                                <input type="text" class="form-control" name="customer_long_name" placeholder="Customer Long Name" value= "<?php echo $customer_long_name; ?>"  required>
+                                <input type="text" class="form-control" name="customer_long_name" placeholder="Customer Long Name" value= "<?php echo $customer_long_name; ?>"  >
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                             </div>
                         </div>
@@ -120,66 +190,59 @@ include('../config.php');
                         <!--display customer billing address-->
                         <div class="form-group">
                             <label>Customer Billing Address</label>
-
-                            <?php //split the string billing address based on semi-colon
-                                //$customer_billing_address = $row['customer_billing_address'];
-
-                                //declare 3 variables as blank to prevent no data from the string
-                                $customer_billing_address_street = "";
-                                $customer_billing_address_city = "";
-                                $customer_billing_address_country = "";
-
-                                //split the string and assign to the variables
-                                if ($customer_billing_address != ""){
-                                    list($customer_billing_address_street, $customer_billing_address_city, $customer_billing_address_country) = explode(";", $customer_billing_address);
-                                    }
-                            ?>
-
                             <!--display customer billing address street + city + country-->
-                            <div class="row">
-
-                                <!--display customer billing address street-->
-                                <div class="form-group col-md-12">
-                                    <label>Street</label>
-                                    <div class="input-group">
-                                        <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_street" placeholder="Street" value="<?php echo $customer_billing_address_street; ?>" required>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                                    </div>
-                                </div>
-
-                                <!--display customer billing address city-->
-                                <div class="form-group col-md-7">
-                                    <label>City</label>
-                                    <div class="input-group">
-                                        <input type="text" style="min-width:90%" class="form-control" name="customer_billing_address_city" placeholder="City" value="<?php echo $customer_billing_address_city; ?>" required>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                                    </div>
-                                </div>
-
-                                <!--display customer billing address country-->
-                                <div class="form-group col-md-5">
-                                    <label>Country</label>
-                                    <div class="input-group">
-                                        <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_country" placeholder="Country" value="<?php echo $customer_billing_address_country; ?>" required>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                                    </div>
+                            <!--display customer billing address street-->
+                            <div class="form-group col-sm-12">
+                                <label>Street</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_customer_billing_address_street_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <input type="text" style="min-width:100%" class="form-control" name="customer_billing_address_street" placeholder="Street" value="<?php echo $customer_billing_address_street; ?>" >
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                 </div>
                             </div>
+
+                            <!--display customer billing address country-->
+                            <div class="form-group col-sm-4">
+                                <label>Country</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_customer_billing_address_country_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <select style="min-width:100%" class="form-control" name="customer_billing_address_country" id="customer_billing_address_country"></select>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+
+                            <!--display customer billing address city-->
+                            <div class="form-group col-sm-6 pull-right">
+                                <label>City</label>
+                                <!--display the error line of code-->
+                                <div id="myForm_customer_billing_address_city_errorloc" class="error"></div>
+                                <div class="input-group">
+                                    <select id="customer_billing_address_city" class="form-control" style="min-width:100%" name="customer_billing_address_city"></select>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
                         </div>
 
                         <!--display customer tax code-->
-                        <div class="form-group">
+                        <div class="form-group col-sm-4">
                             <label>Customer Tax Code</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_customer_tax_code_errorloc" class="error"></div>
                             <div class="input-group">
-                                <input type="text" class="form-control" name="customer_tax_code" placeholder="Customer Tax Code" value="<?php echo $customer_tax_code; ?>" required>
+                                <input type="text" class="form-control" name="customer_tax_code" placeholder="Customer Tax Code" value="<?php echo $customer_tax_code; ?>" >
                                 <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                             </div>
                         </div>
 
                         <!--display customer accountable salesperson + responsible supervisor-->
-                        <div class="form-group">
+                        <div class="form-group col-sm-6 pull-right">
                             <label>Salesperson Accountable</label>
                             <div class="input-group">
+                                <!--display the error line of code-->
+                                <!--<div id="myForm_staff_id_errorloc" class="error"></div>-->
                                 <input type="text" class="form-control" name="staff_name" placeholder="Salesperson Accountable" value="<?php echo $staff_name; ?>" disabled>
                                 <!--<input type="hidden" class="form-control" name="staff_supervisor_id" placeholder="Staff Supervisor ID" value="<?php echo $staff_supervisor_id; ?>">-->
                                 <input type="hidden" class="form-control" name="staff_id" placeholder="Staff ID" value="<?php echo $staff_id; ?>">
@@ -187,26 +250,14 @@ include('../config.php');
                             </div>
                         </div>
 
-                        <!--display customer description-->
-                        <div class="form-group">
-                            <label>Customer Status</label>
-                            <div>
-                                <!--run script to set the default option of select box to be the corresponding status of customer-->
-                                <script>
-                                    $(document).ready(function() {
-                                        $("#customer_status_select").val("<?php echo $customer_status;?>");
-                                        //alert("<?php echo $customer_status;?>")
-                                    });
-                                </script>
-
-                                <!--set up the status of customer -->
-                                <select id="customer_status_select" name="customer_status" class="form-control">
-                                    <option name="customer_status_none" value="None"> Please select a status</option>
-                                    <option name="customer_status_active" value="Active">Active</option>
-                                    <option name="customer_status_suspended" value="Suspended">Suspended</option>
-                                    <option name="customer_status_deleted" value="Deleted">Deleted</option>
-                                </select>
-                                <span class="input-group-addon"><span class="glyphicon"></span></span>
+                        <!--display customer phone number-->
+                        <div class="form-group col-sm-4">
+                            <label>Customer Phone Number</label>
+                            <!--display the error line of code-->
+                            <div id="myForm_customer_phone_number_errorloc" class="error"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="customer_phone_number" placeholder="Customer Phone Number" value="<?php echo $customer_phone_number; ?>">
+                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                             </div>
                         </div>
                     </fieldset>
@@ -226,28 +277,34 @@ include('../config.php');
                                 <!--<legend>Contact Person</legend>-->
 
                                 <!--contact person name-->
-                                <div class="form-group" style="margin-top: 15px !important;">
+                                <div class="form-group col-sm-12" style="margin-top: 15px !important;">
                                     <label>Contact Person Name</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_contact_person_name_errorloc" class="error"></div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="customer_contact_person_name" placeholder="Contact person Name" value="<?php echo $customer_contact_person_name; ?>" required>
+                                        <input type="text" class="form-control" name="customer_contact_person_name" placeholder="Contact person Name" value="<?php echo $customer_contact_person_name; ?>" >
                                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                     </div>
                                 </div>
 
                                 <!--contact person phone number-->
-                                <div class="form-group">
+                                <div class="form-group col-sm-4">
                                     <label>Phone Number</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_contact_person_phone_number_errorloc" class="error"></div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="customer_contact_person_phone_number" placeholder="Phone Number" value="<?php echo $customer_contact_person_phone_number; ?>" required>
+                                        <input type="text" class="form-control" name="customer_contact_person_phone_number" placeholder="Phone Number" value="<?php echo $customer_contact_person_phone_number; ?>" >
                                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                     </div>
                                 </div>
 
                                 <!--contact person email address-->
-                                <div class="form-group">
+                                <div class="form-group col-sm-8">
                                     <label>Email Address</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_contact_person_email_errorloc" class="error"></div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="customer_contact_person_email" placeholder="Email Address" value="<?php echo $customer_contact_person_email; ?>" required>
+                                        <input type="text" class="form-control" name="customer_contact_person_email" placeholder="Email Address" value="<?php echo $customer_contact_person_email; ?>" >
                                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                     </div>
                                 </div>
@@ -256,55 +313,41 @@ include('../config.php');
                             <!--tab Customer shipping address-->
                             <div class="tab-pane" id="shipping">
                                 <div class="form-group" style="margin-top: 15px !important;">
+                                <!--display customer shipping address street + city + country-->
+                                    <!--display customer shipping address street-->
+                                    <div class="form-group col-sm-12">
+                                        <label>Street</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_shipping_address_street_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_street" placeholder="Street" value="<?php echo $customer_shipping_address_street; ?>" >
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
 
-                                <?php //split the string shipping address based on semi-colon
-                                //$customer_shipping_address = $row['customer_shipping_address'];
+                                    <!--display customer shipping address country-->
+                                    <div class="form-group col-sm-6">
+                                        <label>Country</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_shipping_address_country_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <select id="customer_shipping_address_country" class="form-control" style="min-width:100%" name="customer_shipping_address_country"></select>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
 
-                                //declare 3 variables as blank to prevent no data from the string
-                                $customer_shipping_address_street = "";
-                                $customer_shipping_address_city = "";
-                                $customer_shipping_address_country = "";
-
-                                //split the string and assign to the variables
-                                if ($customer_shipping_address != ""){
-                                    list($customer_shipping_address_street, $customer_shipping_address_city, $customer_shipping_address_country) = explode(";", $customer_shipping_address);
-                                    }
-                            ?>
-
-                            <!--display customer shipping address street + city + country-->
-                            <div class="row">
-
-                                <!--display customer shipping address street-->
-                                <div class="form-group col-md-12">
-                                    <label>Street</label>
-                                    <div class="input-group">
-                                        <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_street" placeholder="Street" value="<?php echo $customer_shipping_address_street; ?>" required>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    <!--display customer shipping address city-->
+                                    <div class="form-group col-sm-4 pull-right">
+                                        <label>City</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_shipping_address_city_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <select id="customer_shipping_address_city" class="form-control" style="min-width:100%" name="customer_shipping_address_city"></select>
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <!--display customer shipping address city-->
-                                <div class="form-group col-md-7">
-                                    <label>City</label>
-                                    <div class="input-group">
-                                        <input type="text" style="min-width:90%" class="form-control" name="customer_shipping_address_city" placeholder="City" value="<?php echo $customer_shipping_address_city; ?>" required>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                                    </div>
-                                </div>
-
-                                <!--display customer shipping address country-->
-                                <div class="form-group col-md-5">
-                                    <label>Country</label>
-                                    <div class="input-group">
-                                        <input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_country" placeholder="Country" value="<?php echo $customer_shipping_address_country; ?>" required>
-                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                                    <div class="clear"></div>
-
-                                </div>
+                                <div class="clearfix"></div>
                             </div>
 
                             <!--sub-tab payment term + details-->
@@ -312,28 +355,52 @@ include('../config.php');
                                 <!--<legend>Payment</legend>-->
 
                                 <!--credit limit-->
-                                <div class="form-group" style="margin-top: 15px !important;">
+                                <div class="form-group col-sm-12" style="margin-top: 15px !important;">
                                     <label>Customer Credit Limit</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_credit_limit_errorloc" class="error"></div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="customer_credit_limit" placeholder="Customer Credit Limit" value="<?php echo $customer_credit_limit; ?>" required>
+                                        <input type="text" class="form-control" name="customer_credit_limit" placeholder="Customer Credit Limit" value="<?php echo $customer_credit_limit; ?>" >
                                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                     </div>
                                 </div>
-
-                                <!--customer payment-->
-                                <!--<div class="form-group">-->
-                                    <!--<label>Customer Payment</label>-->
-                                    <!--<div class="input-group">-->
-                                        <!--<input type="text" class="form-control" name="customer_payment" placeholder="Customer Payment" value="<?php echo $customer_payment; ?>" required>-->
-                                        <!--<span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-
-                                <!--customer payment term -->
-                                <div class="form-group">
-                                    <label>Customer Payment Term</label>
+                                
+                                <!--current credit-->
+                                <div class="form-group col-sm-12" style="margin-top: 15px !important;">
+                                    <label>Customer Current Credit</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_current_credit_errorloc" class="error"></div>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="customer_payment_term" placeholder="Customer Payment Term" value="<?php echo $customer_payment_term; ?>" required>
+                                        <input type="text" class="form-control" name="customer_current_credit" placeholder="Customer Current Credit" value="<?php echo $customer_current_credit; ?>" readonly>
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group col-sm-12">
+                                    <label>Customer Payment Term</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_payment_term_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <!--select payment term on the list-->
+                                        <select id="customer_payment_term" name="customer_payment_term" class="form-control">
+
+                                            <option value="0" selected disabled>Select a Payment Term</option>
+
+                                            <?php
+                                                //set up the sql to select the record that has the corresponding payment_term_id
+                                                $sql_payment_term_select = "SELECT DISTINCT customer_payment_term FROM customer";
+
+                                                //run the query to get the payment_term
+                                                $query_payment_term_select = mysqli_query($db,$sql_payment_term_select);
+
+                                                //fetch the result to an array
+                                                while($row_payment_term_select = mysqli_fetch_assoc($query_payment_term_select)) {
+                                            ?>
+
+                                            <option value="<?php echo $row_payment_term_select['customer_payment_term'];?>"><?php echo $row_payment_term_select['customer_payment_term'];?></option>
+
+                                            <?php } ?>
+                                        </select>
                                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
                                     </div>
                                 </div>
@@ -343,12 +410,48 @@ include('../config.php');
 
                     <!--submit button-->
                     <input type="submit" name="submit" id="submit" value="Update" class="btn btn-default pull-right">
-                </div>
             </form>
         </div>
     </div>
 
     <div id="footer"></div>
+    <!--script to validate inputs
+    Reference: http://www.javascript-coder.com/html-form/javascript-form-validation.phtml/comment-page-6#comments-->
+    <script language="JavaScript" type="text/javascript">
+        //You should create the validator only after the definition of the HTML form
+        var frmvalidator  = new Validator("myForm");
+        frmvalidator.EnableOnPageErrorDisplay();
+        frmvalidator.EnableMsgsTogether();
 
+        frmvalidator.addValidation("customer_name","req","Customer Name is required");
+        frmvalidator.addValidation("customer_long_name","req","Customer Long Name is required");
+
+        frmvalidator.addValidation("customer_billing_address_street","req","Billing Address is required");
+        frmvalidator.addValidation("customer_billing_address_city","req","Billing Address is required");
+        frmvalidator.addValidation("customer_billing_address_country","req","Billing Address is required");
+
+        frmvalidator.addValidation("customer_tax_code","req","Tax Code is required");
+        frmvalidator.addValidation("customer_tax_code","num","Tax Code is numeric only");
+
+        frmvalidator.addValidation("staff_id","req","Sale Person Accountable is required");
+
+        frmvalidator.addValidation("customer_contact_person_name","req","Contact person name is required");
+
+        frmvalidator.addValidation("customer_contact_person_phone_number","req","Contact person phone number is required");
+        frmvalidator.addValidation("customer_contact_person_phone_number","phone","Contact person phone number is numeric only");
+
+        frmvalidator.addValidation("customer_contact_person_email","req","Contact person email is required");
+        frmvalidator.addValidation("customer_contact_person_email","email","Contact person email is required");
+
+        frmvalidator.addValidation("customer_shipping_address_street","req","Shipping Address Street is required");
+        frmvalidator.addValidation("customer_shipping_address_city","req","Shipping Address City is required");
+        frmvalidator.addValidation("customer_shipping_address_country","req","Shipping Address Country is required");
+
+        frmvalidator.addValidation("customer_credit_limit","req","Credit Limit is required");
+        frmvalidator.addValidation("customer_credit_limit","num","Credit Limit is required");
+
+        frmvalidator.addValidation("customer_payment_term","req","Payment Term is required");
+
+    </script>
 </body>
 </html>

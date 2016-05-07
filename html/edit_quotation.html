@@ -14,11 +14,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <script src="../js/jquery-2.1.4.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/script.js"></script>
+    <script src="../js/partialsScript.js"></script>
     <script src="../lib/angular/angular.min.js"></script>
     <script src="../js/gen_validatorv4.js"></script>
-    <script src="../js/moment.js"></script>
     <script src="../js/displayCustomerDetails.js"></script>
+    <script src="../js/bootbox.min.js"></script>
+    <script src="../js/confirmScript.js"></script>
+    <script src="../js/customScript.js"></script>
+    <script src="../js/countries.js"></script>
 
 </head>
 <body>
@@ -39,49 +42,50 @@
 
             //load all the quotation by default
             //run sql to select all the quotation
-            $sql = "SELECT
-                quotation.quotation_id, quotation.quotation_create_date, quotation.quotation_create_time, quotation.quotation_status, quotation.customer_id,
-                customer.customer_name, customer.customer_id,
-                quotation.quotation_total, quotation.quotation_reference,
-                quotation_line.quotation_line_id, quotation_line.quotation_line_item_id, quotation_line.quotation_line_item_quantity, quotation_line.quotation_line_item_total_value, quotation_line.quotation_line_deliver_date, quotation_line.quotation_line_selling_price, quotation_line.quotation_line_net_selling_price,
-                item.item_name,item.item_unit_of_measurement, item.item_vendor, item.item_manufacturer
-            FROM quotation
-            JOIN customer
-                ON quotation.customer_id =customer.customer_id
-            JOIN quotation_line
-                ON quotation.quotation_id = quotation_line.quotation_id
-            JOIN item
-                ON quotation_line.quotation_line_item_id = item.item_id
-            WHERE quotation.quotation_id = '$edit_quotation_id'";
-
+            $sql = "SELECT *, customer.customer_id, customer_name FROM quotation
+                    JOIN customer
+                        ON quotation.customer_id = customer.customer_id
+                    WHERE quotation.quotation_id = '$edit_quotation_id'";
+			
             //connect to db via $db and execute the sql
             $result = mysqli_query($db, $sql);
 
             //fetch the result to an array
             $row = mysqli_fetch_assoc($result);
             }
+
+            $quotation_shipping_address = $row['quotation_shipping_address'];
+            //split the string and assign to the variables
+            if ($quotation_shipping_address != ""){
+                list($quotation_shipping_address_street, $quotation_shipping_address_city, $quotation_shipping_address_country) = explode(";", $quotation_shipping_address);
+            }
         ?>
 
-        <form role="form" name="myForm" action="../php/edit_quotation.php" method="post">
-            <div class="col-lg-10 col-lg-push-1 col-md-10 col-md-push-1">
+        <form role="form" name="myForm" id="myForm" action="../php/edit_quotation.php" method="post">
 
                 <h2 class="text-center">Quotation</h2>
                 <!-- define the note for * symbol-->
-                <div class="well well-sm col-md-4 text-center"><strong><span class="glyphicon glyphicon-asterisk"></span>Required Field</strong></div>
-
-                <!-- display the Quotation ID -->
-                <div class="well well-sm col-md-4 text-center pull-right">
+                <div class="well well-sm col-sm-2 text-center">
+					<strong>
+                        <span class="glyphicon glyphicon-asterisk"></span>
+                        Required Field
+                    </strong>
+                </div>
+				
+				<!-- display the quotation ID -->
+                <div class="well well-sm col-sm-2 text-center pull-right">
                     <strong>Quotation ID:
-                        <input name="quotation_id" value="<?php echo $edit_quotation_id;?>" >
+                        <input name="quotation_id" style="width:15%" class="readonly" value="<?php echo $edit_quotation_id;?>">
                     </strong>
                 </div>
 
                 <!--clear floating display style so that all input can display vertically-->
                 <div class="clearfix"></div>
+
                 <div class="form-group">
 
                     <label>Customer Name</label>
-                    <div class="input-group">
+                    <div class="input-group col-sm-4">
 
                         <!--run script to set the default option of select box to be the corresponding name of customer-->
                         <!--<script>-->
@@ -90,7 +94,7 @@
                             <!--});-->
                         <!--</script>-->
 
-                        <select id="customer_id_select" name="customer_id" class="form-control" >
+                        <select id="customer_id_select" name="customer_id" class="form-control" disabled>
                             <!--<option value="0" selected disabled>&#45;&#45;Please Select Customer Name&#45;&#45;</option>-->
 
                             <?php
@@ -104,7 +108,7 @@
 
                         <!--run the script to load corresponding customer details based on the change of customer name-->
                         <script>
-                            displayCustomerDetails(document.getElementById("customer_id_select").value);
+                            displayCustomerDetails("<?php echo $row['customer_id'];?>",'dataTableCustomer');
                         </script>
 
                         <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
@@ -112,40 +116,300 @@
                 </div>
 
                 <!--Display customer information as user select from select input above-->
-                <div class="form-group" id="customer_detail_display">
-                    <p hidden>[Customer Description]</p>
-                </div>
+                <fieldset>
+                    <legend>Basic Information</legend>
+                    <div>
+                        <!--start of defining tabs-->
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#general_details" data-toggle="tab">General Details</a></li>
+                            <li><a href="#address" data-toggle="tab">Billing/Shipping Address</a></li>
+                            <li><a href="#payment" data-toggle="tab">Payment</a></li>
+                        </ul>
+                        <!--end of defining tabs-->
+
+                        <!--start of displaying the fields in tabs-->
+                        <div class="tab-content">
+                            <!--start of displaying general details tab-->
+                            <div class="tab-pane active" id="general_details">
+                                <br>
+                                <!--start of displaying in 2 columns-->
+                                <div class="container-fluid">
+                                    <!--start of displaying left column-->
+                                    <div class="form-group col-sm-8">
+                                        <!--start of displaying name-->
+                                        <div class="form-group col-sm-5">
+                                            <label>Short Name</label>
+                                            <!--display the error line of code-->
+                                            <div id="myForm_customer_name_errorloc" class="error"></div>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="customer_name" name="customer_name" placeholder="Customer Short Name"  >
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-sm-7">
+                                            <label>Long Name</label>
+                                            <!--display the error line of code-->
+                                            <div id="myForm_customer_long_name_errorloc" class="error"></div>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="customer_long_name" name="customer_long_name" placeholder="Customer Long Name" >
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                            </div>
+                                        </div>
+                                        <!--end of displaying name-->
+
+                                        <!--start of displaying customer tax code-->
+                                        <div class="form-group col-sm-4">
+                                            <label>Tax Code</label>
+                                            <!--display the error line of code-->
+                                            <div id="myForm_customer_tax_code_errorloc" class="error"></div>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="customer_tax_code" name="customer_tax_code" placeholder="Tax Code" >
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                            </div>
+                                        </div>
+                                        <!--end of displaying customer tax code-->
+
+                                        <div class="form-group col-sm-1"></div>
+
+                                        <!--start of displaying customer phone number-->
+                                        <div class="form-group col-sm-4">
+                                            <label>Phone Number</label>
+                                            <!--display the error line of code-->
+                                            <div id="myForm_customer_phone_number_errorloc" class="error"></div>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="customer_phone_number" name="customer_phone_number" placeholder="Phone Number" >
+                                                <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                            </div>
+                                        </div>
+                                        <!--end of displaying customer phone number-->
+                                    </div>
+                                    <!--end of displaying left column-->
+
+                                    <!--start of displaying right column-->
+                                    <div class="form-group col-sm-4">
+                                            <!--start of displaying customer status-->
+                                            <div class="form-group col-sm-12">
+                                                <label>Customer Status</label><br>
+                                                <!--status of customer -->
+                                                <input id="customer_status" class="form-control" name="customer_status">
+                                            </div>
+                                            <!--end of displaying customer status-->
+
+                                            <!--start of displaying customer accountable salesperson-->
+                                            <div class="form-group col-sm-12">
+                                                <label>Salesperson Accountable</label>
+                                                <!--display the error line of code-->
+                                                <div id="myForm_staff_id_errorloc" class="error"></div>
+                                                <div class="input-group">
+                                                    <!--select staff on the list-->
+                                                    <input id="staff_id" name="staff_id" class="form-control">
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                                </div>
+                                            </div>
+                                            <!--end of displaying customer accountable salesperson-->
+                                    </div>
+                                    <!--end of displaying right column-->
+                                </div>
+                                <!--end of displaying in 2 columns-->
+                            </div>
+                            <!--end of displaying customer general details tab-->
+
+                            <!--start of displaying customer address tab-->
+                            <div class="tab-pane" id="address">
+                                <br>
+                                <!--start of displaying customer billing address-->
+                                <div class="form-group col-sm-6" style="border-right: thin solid #EEEEEE">
+                                    <label>Billing Address</label>
+                                    <br>
+                                    <!--start of displaying customer billing address street-->
+                                    <div class="form-group col-sm-10">
+                                        <label>Street</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_billing_address_street_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <input type="text" style="min-width:100%" class="form-control" id="customer_billing_address_street" name="customer_billing_address_street" placeholder="Street" >
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                    <!--end of displaying customer billing address street-->
+
+                                    <div class="clearfix"></div>
+
+                                    <!--start of displaying customer billing address country-->
+                                    <div class="form-group col-sm-5">
+                                        <label>Country</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_billing_address_country_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" style="min-width:100%" id="customer_billing_address_country" name="customer_billing_address_country" placeholder="Country">
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                    <!--end of displaying customer billing address country-->
+
+                                    <!--start of displaying customer billing address city-->
+                                    <div class="form-group col-sm-5">
+                                        <label>City</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_billing_address_city_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" style="min-width:100%" id="customer_billing_address_city" name="customer_billing_address_city" placeholder="City / State">
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                    <!--end of displaying customer billing address city-->
+                                </div>
+                                <!--end of displaying customer billing address-->
+
+                                <!--start of displaying customer shipping address-->
+                                <div class="form-group col-sm-6">
+                                    <label>Shipping Address</label>
+                                    <br>
+                                    <!--start of displaying customer shipping address street-->
+                                    <div class="form-group col-sm-10">
+                                        <label>Street</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_shipping_address_street_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <input type="text" style="min-width:100%" class="form-control" id="customer_shipping_address_street" name="customer_shipping_address_street" placeholder="Street" >
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                    <!--end of displaying customer shipping address street-->
+
+                                    <!--start of displaying customer shipping address country-->
+                                    <div class="form-group col-sm-5">
+                                        <label>Country</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_shipping_address_country_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <select id="customer_shipping_address_country" class="form-control" style="min-width:100%" name="customer_shipping_address_country"></select>
+                                            <!--<input type="text" style="min-width:100%" class="form-control" name="customer_shipping_address_country" placeholder="Country" > -->
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                    <!--end of displaying customer shipping address country-->
+
+                                    <!--start of displaying customer shipping address city-->
+                                    <div class="form-group col-sm-5">
+                                        <label>City</label>
+                                        <!--display the error line of code-->
+                                        <div id="myForm_customer_shipping_address_city_errorloc" class="error"></div>
+                                        <div class="input-group">
+                                            <select id="customer_shipping_address_city" class="form-control" style="min-width:100%" name="customer_shipping_address_city"></select>
+                                            <!--<input type="text" style="min-width:90%" class="form-control" name="customer_shipping_address_city" placeholder="City" >-->
+                                            <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                        </div>
+                                    </div>
+                                    <!--end of displaying customer shipping address city-->
+
+                                    <!--script to load city in case user changes the shipping address-->
+                                    <script language="javascript">
+                                        populateCountries("customer_shipping_address_country", "customer_shipping_address_city");
+                                    </script>
+                                </div>
+                                <!--end of displaying customer shipping address-->
+                            </div>
+                            <!--end of displaying customer address tab-->
+
+                            <!--start of displaying payment tab-->
+                            <div class="tab-pane" id="payment">
+                                <br>
+                                <!--start of displaying credit limit-->
+                                <div class="form-group col-sm-3">
+                                    <label>Customer Credit Limit</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_credit_limit_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="customer_credit_limit" name="customer_credit_limit" placeholder="Customer Credit Limit">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                                <!--end of displaying credit limit-->
+
+                                <!--start of displaying current credit-->
+                                <div class="form-group col-sm-3">
+                                    <label>Customer Current Credit</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_current_credit_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="customer_current_credit" name="customer_current_credit" placeholder="Customer Current Credit">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                                <!--end of displaying current credit-->
+                                
+                                <div class="clearfix"></div>
+
+                                <!--start of displaying customer payment term -->
+                                <div class="form-group col-sm-3">
+                                    <label>Customer Payment Term</label>
+                                    <!--display the error line of code-->
+                                    <div id="myForm_customer_payment_term_errorloc" class="error"></div>
+                                    <div class="input-group">
+                                        <!--select payment term on the list-->
+                                        <input id="customer_payment_term" name="customer_payment_term" class="form-control">
+                                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                                    </div>
+                                </div>
+                                <!--end of displaying customer payment term-->
+                            </div>
+                            <!--end of displaying payment tab-->
+                        </div>
+                        <!--end of displaying the fields in tabs-->
+                    </div>
+                </fieldset>
 
                 <div class="form-group ">
                     <label>Quotation Status</label>
-                    <div class="input-group">
-                        <select name="quotation_status" class="form-control">
-                            <option selected disabled>--Please Select Quotation Status--</option>
-                            <option>Processed</option>
-                            <option>Shipped</option>
-                            <option>Delivered</option>
-                        </select>
-                        <span class="input-group-addon"><span class="glyphicon glyphicon-asterisk"></span></span>
+                    <div class="input-group col-sm-2">
+                        <input type="text" class="form-control" name="quotation_status" value="<?php echo $row['quotation_status'];?>" readonly>
+                        <span  class="input-group-addon"><span  class="glyphicon glyphicon-asterisk"></span></span>
                     </div>
+					
+					 <!--Quotation line starts here-->
+                    <!--connect db to load quotation line data-->
+					<?php
+                        $sql_quotation_line = "SELECT
+                            quotation.quotation_id, quotation.quotation_create_date, quotation.quotation_close_date, quotation.quotation_status, quotation.customer_id,
+							customer.customer_name, customer.customer_id,
+							quotation.quotation_total, quotation_line.quotation_line_id, 
+							quotation_line.quotation_line_item_id, quotation_line.quotation_line_item_quantity, quotation_line.quotation_line_estimate_price, quotation_line.quotation_line_estimate_net_price,
+							item.item_name,item.item_unit_of_measurement, item.item_vendor, item.item_manufacturer, item.item_unit_price, item.item_VAT
+						FROM quotation
+						JOIN customer
+							ON quotation.customer_id =customer.customer_id
+						JOIN quotation_line
+							ON quotation.quotation_id = quotation_line.quotation_id
+						JOIN item
+							ON quotation_line.quotation_line_item_id = item.item_id
+						WHERE quotation.quotation_id = '$edit_quotation_id'";
 
+                        //run the query to get the required details
+                        $query_quotation_line = mysqli_query($db,$sql_quotation_line) or die ("Error: Cannot find quotation lines");
+                    ?>
+					
                     <!--Dynamic Form Processing with PHP-->
                     <div class="form-group">
                         <legend>Quotation Line</legend>
-                        <input type="button" value="Add New Quotation Line" onClick="addRow('dataTable')" />
-                        <input type="button" value="Remove Checked Quotation Line" onClick="deleteRow('dataTable')"  />
-                        <p>(All acions apply only to entries with check marked check boxes only.)</p>
+                        
+                        <input type="button" class="btn btn-success fa" value="&#xf0fe;" style='width:4%' title="Add New Quotation Line" onClick="addRow('dataTableQuotation','quotation')" />
+                        <input type="button" class="btn btn-danger fa" value="&#xf147;" style='width:4%' title="Remove Checked Quotation Line" onClick="deleteRow('dataTableQuotation','quotation')"  />
+                        
+                        <p>(All actions apply only to entries with check marked check boxes only.)</p>
                         <div id="myForm_errorloc" class="error"></div>
                         <table id="dataTableQuotation" class="table">
                             <tr>
                                 <th></th>
-                                <th>
-                                    <label>Quotation Line ID</label>
-                                </th>
-                                <th>
-                                    <label>Item ID</label>
+                                <th style="width:70px" hidden>
+                                    <label>Line ID</label>
                                 </th>
                                 <th>
                                     <label>Item Name</label>
+                                </th>
+                                <th>
+                                    <label>Manufacturer</label>
                                 </th>
                                 <th>
                                     <label>Quantity</label>
@@ -154,82 +418,79 @@
                                     <label>Vendor</label>
                                 </th>
                                 <th>
-                                    <label>Delivery Date</label>
+                                    <label>Estimate Selling price</label>
                                 </th>
                                 <th>
-                                    <label>Total value</label>
-                                </th>
-                                <th>
-                                    <label>Selling price</label>
-                                </th>
-                                <th>
-                                    <label>Net selling price</label>
+                                    <label>Estimate Net selling price</label>
                                 </th>
                                 <th>
                                     <label>Tax</label>
                                 </th>
                             </tr>
-                            <tr>
-                                <td><input type="checkbox"  name="chk[]"/></td>
-                                <td>
-                                    <input type="text" style="width:90%"  name="quotation_line_id[]" >
+							
+							<!--start to load and display the quotation lines of this quotation-->
+                            <?php
+                            //fetch the result to an array
+                            // multidimension array source: http://www.w3schools.com/php/php_arrays_multi.asp
+                            while($row_quotation_line = mysqli_fetch_assoc($query_quotation_line)){
+                                $array_quotation_line[] = $row_quotation_line;}
+                            //for each element of array, load a different record
+                            for ($array_count = 0; $array_count < count($array_quotation_line); $array_count++){
+                            ?>
+							
+                            <tr id="row-<?php echo $array_count;?>">
+                                <td id="row-<?php echo $array_count;?>_col-0"><input type="checkbox"  name="chk[]"/></td>
+                                <td id="row-<?php echo $array_count;?>_col-1" hidden>
+                                    <input type="text" style="width:90%"  name="quotation_line_id[]" value="<?php echo $array_quotation_line[$array_count]['quotation_line_id'];?>">
                                 </td>
-                                <td >
-                                    <!--load all the item in the item table. display item name and store item id as value of option -->
-                                    <select id="item_id_select" style="width:200px" name="item_id[]">
-                                        <?php
-                                        //set up sql query to list all items
-                                        $sql_item_select = "SELECT item_id, item_name FROM item";
-                                        //connect to db via $db and execute the sql
-                                        $result_item_select = mysqli_query($db, $sql_item_select);
-                                        //fetch the result to an array
-                                        while($row_item_select = mysqli_fetch_assoc($result_item_select))
-                                        {
-                                            echo "<option value=" . $row_item_select['item_id'] . ">" . $row_item_select['item_name'] . "</option>";
-                                        }
-                                        ?>
+                                <td id="row-<?php echo $array_count;?>_col-2">
+                                        <!--load all the item in the item table. display item name and store item id as value of option -->
+                                        <select id="item_id_select_<?php echo $array_count;?>" class="form-control" style="width:200px" name="item_id[]" onchange="displayItemDetails(this.value, this.id,'quotation')">
+											<?php
+                                            //set up sql query to list all items
+                                            $sql_item_select = "SELECT item_id, item_name FROM item";
+                                            //connect to db via $db and execute the sql
+                                            $result_item_select = mysqli_query($db, $sql_item_select);
+                                            //fetch the result to an array
+                                            while($row_item_select = mysqli_fetch_assoc($result_item_select))
+                                            {
+                                                $selected = ($row_item_select['item_id'] == $array_quotation_line[$array_count]['quotation_line_item_id']) ? "selected='selected'" : "";
+                                                echo "<option value=" . $row_item_select['item_id'] . " " . $selected . ">" . $row_item_select['item_name'] . "</option>";
+                                            }
+                                            ?>
                                     </select>
+									<!--<?php echo $array_quotation_line[$array_count]['item_name'];?>-->
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-3">
+                                    <input type="text" style="width:90%"  name="item_manufacturer[]" class="form-control" value="<?php echo $array_quotation_line[$array_count]['item_manufacturer'];?>" readonly>
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-4">
+                                    <input type="text" style="width:90%"  class="form-control" oninput="calculatePrice('row-<?php echo $array_count;?>', 'quotation')" name="quotation_line_item_quantity[]" min="0" value="<?php echo $array_quotation_line[$array_count]['quotation_line_item_quantity'];?>">
+                                </td>
+                                <td id="row-<?php echo $array_count;?>_col-5">
+                                    <input type="text" style="width:90%" class="form-control" name="item_vendor[]" value="<?php echo $array_quotation_line[$array_count]['item_vendor'];?>" readonly>
+                                </td>
 
-                                    <!--run the script to load corresponding item details based on the change of item name-->
-                                    <!--<script>
-                                    displayItemDetails(document.getElementById('item_id_select').value, this.rowIndex)
-                                        displayItemDetails(document.getElementById("item_id_select").value);
-                                    </script>-->
+                                <td id="row-<?php echo $array_count;?>_col-6">
+                                    <input type="text" style="width:90%" class="form-control" oninput="calculatePrice('row-<?php echo $array_count;?>', 'quotation')" name="quotation_line_estimate_price[]" min="0" value="<?php echo $array_quotation_line[$array_count]['item_unit_price'];?>">
                                 </td>
-                                <td>
-                                    <input type="text" style="width:90%"  name="item_name[]">
+                                <td id="row-<?php echo $array_count;?>_col-7">
+                                    <input type="text" style="width:90%" class="form-control" name="quotation_line_estimate_net_price[]" min="0" value="<?php echo $array_quotation_line[$array_count]['quotation_line_estimate_net_price'];?>" readonly>
                                 </td>
-                                <td>
-                                    <input type="text" style="width:90%"  name="quotation_line_item_quantity[]" min="0">
+                                <td id="row-<?php echo $array_count;?>_col-8">
+                                    <input type="text" style="width:90%" class="form-control" name="item_VAT[]" value="<?php echo $array_quotation_line[$array_count]['item_VAT'];?>"  readonly>
                                 </td>
-                                <td>
-                                    <input type="text" style="width:90%"  name="item_vendor[]">
-                                </td>
-                                <td>
-                                    <input type="date" style="width:90%" name="quotation_line_delivery_date[]">
-                                </td>
-                                <td>
-                                    <input type="text" style="width:90%"  name="quotation_line_total_value[]" >
-                                </td>
-                                <td>
-                                    <input type="text" style="width:90%" name="quotation_line_selling_price[]" min="0">
-                                </td>
-                                <td>
-                                    <input type="text" style="width:90%" name="quotation_line_net_selling_price[]" min="0">
-                                </td>
-                                <td>
-                                    <input type="text" style="width:90%" name="item_VAT[]">
-                                </td>
-                            </tr>
+                             </tr>
+                            <?php } ?>
                         </table>
                         <div class="clear"></div>
-                        <!--check this link for reference http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
+                        <!--check this link for reference of input array http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP -->
                     </div>
 
                     <div class="form-group">
                         <label>Note</label>
                         <div class="input-group">
-                            <textarea name="quotation_note" class="form-control" rows="2"></textarea>
+                            <textarea name="quotation_note" class="form-control" rows="2"><?php echo $row['quotation_note'];?></textarea>
                             <span class="input-group-addon"><span class="glyphicon"></span></span>
                         </div>
                     </div>
@@ -238,24 +499,33 @@
                         <table>
                             <tr>
                                 <td class="text-right"><label>Net Total Price (Tax exl):</label></td>
-                                <td> <input name="net_total_price"> </td>
+                                <td> <input name="net_total_price" id="netTotal" class="readonly" value="<?php echo $row['quotation_net_total'];?>" readonly> </td>
                             </tr>
                             <tr>
                                 <td class="text-right"><label>Tax:</label></td>
-                                <td> <input name="tax"> </td>
+                                <td> <input name="tax" id="totalTax"  class="readonly" value="<?php echo $row['quotation_tax'];?>" readonly> </td>
                             </tr>
                             <tr>
                                 <td class="text-right"><label>Total Price (Tax incl):</label></td>
-                                <td> <input name="total_price"> </td>
+                                <td> <input name="total_quotation"  class="readonly" id="total" value="<?php echo $row['quotation_total'];?>" readonly> </td>
                             </tr>
                         </table>
                     </div>
+
                     <div class="clearfix"></div>
+
+                    <!-- display the quotation convert option -->
+                    <div class="pull-right checkbox">
+                        <input type="checkbox" name="convert_quotation">Convert to Order after submission</input>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <!--submit button-->
                     <div class="form-group pull-right" style="display: inline-block;vertical-align: bottom;">
                         <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-default">
                     </div>
                 </div>
-            </div>
         </form>
     </div>
 </div>
@@ -272,54 +542,13 @@
     frmvalidator.EnableMsgsTogether();
 
     frmvalidator.addValidation("quotation_line_item_quantity[]","req","Please select quantity");
-    frmvalidator.addValidation("quotation_line_delivery_date[]","req","Please select date of delivery");
-    frmvalidator.addValidation("quotation_line_selling_price[]","req","Please select selling price");
+    frmvalidator.addValidation("quotation_line_estimate_price[]","req","Please enter quotation price");
     frmvalidator.addValidation("item_VAT[]","req","Please enter Tax Percentage");
-
-    /**
-     * Projet Name : Dynamic Form Processing with PHP
-     * URL: http://techstream.org/Web-Development/PHP/Dynamic-Form-Processing-with-PHP
-     *
-     * Licensed under the MIT license.
-     * http://www.opensource.org/licenses/mit-license.php
-     *
-     * Copyright 2013, Tech Stream
-     * http://techstream.org
-     */
-
-    function addRow(tableID) {
-        var table = document.getElementById(tableID);
-        var rowCount = table.rows.length;
-        if(rowCount < 10){							// limit the user from creating fields more than your limits
-            var row = table.insertRow(rowCount);
-            var colCount = table.rows[0].cells.length;
-            for(var i=0; i<colCount; i++) {
-                var newcell = row.insertCell(i);
-                newcell.innerHTML = table.rows[1].cells[i].innerHTML;
-            }
-        }else{
-            alert("Maximum quotation line per quotation is 10   .");
-
-        }
-    }
-
-    function deleteRow(tableID) {
-        var table = document.getElementById(tableID);
-        var rowCount = table.rows.length;
-        for(var i=0; i<rowCount; i++) {
-            var row = table.rows[i];
-            var chkbox = row.cells[0].childNodes[0];
-            if(null != chkbox && true == chkbox.checked) {
-                if(rowCount <= 1) { 						// limit the user from removing all the fields
-                    alert("Cannot Remove all the quotation lines.");
-                    break;
-                }
-                table.deleteRow(i);
-                rowCount--;
-                i--;
-            }
-        }
-    }
+</script>
+<script>
+    $("#" + config.customer.customerShippingAddressCountry).val("<?php echo $quotation_shipping_address_country;?>");
+    populateStates(config.customer.customerShippingAddressCountry, config.customer.customerShippingAddressCity);
+    $("#" + config.customer.customerShippingAddressCity).val("<?php echo $quotation_shipping_address_city;?>");
 </script>
 </body>
 </html>
