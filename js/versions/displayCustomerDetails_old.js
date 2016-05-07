@@ -70,8 +70,8 @@ function displayItemDetails(itemDetailDisplayID, selectId) {
                 // define columns of vendor, selling price, manufacturer, tax
                 const itemManufacturerCol = 3;
                 const itemVendorCol = 5;
-                const itemSellingPriceCol = 7;
-                const itemTaxCol = 9;
+                const itemSellingPriceCol = 8;
+                const itemTaxCol = 10;
                 // declare an array to store info extracted from the json string of searchItem.php
                 // source: http://www.w3schools.com/json/json_http.asp
                 var itemFoundArray = JSON.parse(xmlhttp.responseText);
@@ -97,3 +97,4 @@ function displayItemDetails(itemDetailDisplayID, selectId) {
         xmlhttp.send();
     }
 }
+
